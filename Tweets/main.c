@@ -114,34 +114,52 @@ ALLEGRO_DISPLAY * init_allegro(void)
         fprintf(stderr,"al_init_primitives_addon failed.\n");
         exit(2);
     }
-    al_install_mouse();
+    if(!al_install_mouse())
+    {
+        fprintf(stderr,"al_install_mouse failed\n");
+        
+        al_shutdown_primitives_addon();
+        exit(3);
+    }
     if(!al_install_keyboard())
     {
         fprintf(stderr,"al_install_keyboard failed\n");
-        exit(3);
+        al_uninstall_mouse();
         al_shutdown_primitives_addon();
+        exit(4);
     }
     ALLEGRO_DISPLAY *display=al_create_display(WIDTH,HEIGHT);
     if(!display)
     {
         fprintf(stderr,"al_create_display failed\n");
         al_uninstall_keyboard();
+        al_uninstall_mouse();
         al_shutdown_primitives_addon();
-        exit(4);
+        exit(5);
     }
     al_set_window_position(display,0,0);
     al_init_font_addon();
-    al_init_ttf_addon();
+    if(!al_init_ttf_addon())
+    {
+        fprintf(stderr,"al_init_ttf_addon failed\n");
+        al_uninstall_keyboard();
+        al_uninstall_mouse();
+        al_shutdown_primitives_addon();
+        al_destroy_display(display);
+        al_shutdown_font_addon();
+        exit(6);
+    }
     return display;
 }
 
 void shutdown_allegro(ALLEGRO_DISPLAY *display)
 {
-    al_destroy_display(display);
     al_uninstall_keyboard();
+    al_uninstall_mouse();
+    al_destroy_display(display);
     al_shutdown_primitives_addon();
     al_shutdown_ttf_addon();
-    al_uninstall_mouse();
+    al_shutdown_font_addon();
 }
 
 ALLEGRO_EVENT_QUEUE *create_event_queue(ALLEGRO_DISPLAY *display)
@@ -151,7 +169,7 @@ ALLEGRO_EVENT_QUEUE *create_event_queue(ALLEGRO_DISPLAY *display)
     {
         fprintf(stderr,"al_create_event_queue failed\n");
         shutdown_allegro(display);
-        exit(5);
+        exit(7);
     }
     al_register_event_source(event_queue,al_get_keyboard_event_source());
     al_register_event_source(event_queue,al_get_mouse_event_source());
