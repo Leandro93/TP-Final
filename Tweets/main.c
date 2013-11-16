@@ -23,7 +23,14 @@ typedef char BOOL;
 #define COLOR(x) al_map_rgb(x)
 #define RGB(r,g,b) al_map_rgb(r,g,b)
 
+////////////////////VARIABLES COMPARTIDAS ENTRE THREADS////////////////////
 BOOL _exit_=false;
+char *search1_text;
+char *search2_text;
+char *search3_text;
+char search1_ready=false;
+char search2_ready=false;
+char search3_ready=false;
 
 ////////////////////PROTOTIPOS////////////////////
 void *search1(void*);
@@ -34,6 +41,7 @@ ALLEGRO_DISPLAY * init_allegro(void);
 void shutdown_allegro(ALLEGRO_DISPLAY *display);
 ALLEGRO_EVENT_QUEUE *create_event_queue(ALLEGRO_DISPLAY *display);
 
+////////////////////FUNCIONES////////////////////
 int main(void)
 {
     ALLEGRO_DISPLAY *display=init_allegro();
@@ -50,6 +58,50 @@ int main(void)
     return 0;
 }
 
+////////////////////THREADS////////////////////
+void *search1(void*)
+{
+    while(_exit_==false)
+    {
+        if(search1_ready=false)
+        {
+            
+        }
+       al_rest(1.0/FPS);
+    }
+}
+
+void *search2(void*)
+{
+    while(_exit_==false)
+    {
+        if(search2_ready=false)
+        {
+            
+        }
+        al_rest(1.0/FPS);
+    }
+}
+
+void *search3(void*)
+{
+    while(_exit_==false)
+    {
+        if(search3_ready=false)
+        {
+            
+        }
+        al_rest(1.0/FPS);
+    }
+}
+
+void *main_loop(void *event_queue)
+{
+    ALLEGRO_EVENT_QUEUE* queue=(ALLEGRO_EVENT_QUEUE*)event_queue;
+    _exit_=true;
+}
+
+////////////////////ALLEGRO////////////////////
 ALLEGRO_DISPLAY * init_allegro(void)
 {
     if(!al_init())
@@ -105,36 +157,4 @@ ALLEGRO_EVENT_QUEUE *create_event_queue(ALLEGRO_DISPLAY *display)
     al_register_event_source(event_queue,al_get_mouse_event_source());
     al_register_event_source(event_queue,al_get_display_event_source(display));
     return event_queue;
-}
-
-////////////////////THREADS////////////////////
-void *search1(void*)
-{
-    while(_exit_==false)
-    {
-       al_rest(1.0/FPS);
-    }
-}
-
-void *search2(void*)
-{
-    while(_exit_==false)
-    {
-        al_rest(1.0/FPS);
-    }
-}
-
-void *search3(void*)
-{
-    while(_exit_==false)
-    {
-        al_rest(1.0/FPS);
-    }
-}
-
-void *main_loop(void *event_queue)
-{
-    ALLEGRO_EVENT_QUEUE* queue=(ALLEGRO_EVENT_QUEUE*)event_queue;
-    fprintf(stdout,"exit"); 
-    _exit_=true;
 }
