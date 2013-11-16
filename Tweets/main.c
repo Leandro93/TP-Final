@@ -24,13 +24,14 @@ typedef char BOOL;
 #define RGB(r,g,b) al_map_rgb(r,g,b)
 
 ////////////////////VARIABLES COMPARTIDAS ENTRE THREADS////////////////////
-BOOL _exit_=false;
+BOOL _exit_=false;      //HABRIA QUE AGREGAR ESTAS VARIABLES EN UN ARCHIVO APARTE
 char *search1_text;
 char *search2_text;
 char *search3_text;
 char search1_ready=false;
 char search2_ready=false;
 char search3_ready=false;
+//FALTAN LOS ARREGLOS DE CTWEETS, TODAVIA NO CONSIGO LA LIBRERIA
 
 ////////////////////PROTOTIPOS////////////////////
 void *search1(void*);
@@ -59,7 +60,7 @@ int main(void)
 }
 
 ////////////////////THREADS////////////////////
-void *search1(void*)
+void *search1(void*)    //SOLO BUSCAN Y COLOCAN EN EL ARREGLO LOS RESULTADOS Y EN EL READY EL NUMERO DE RESULTADOS ENCONTRADOS
 {
     while(_exit_==false)
     {
@@ -95,7 +96,7 @@ void *search3(void*)
     }
 }
 
-void *main_loop(void *event_queue)
+void *main_loop(void *event_queue)      //THREAD QUE CONTIENE LAS FUNCIONES DE DIBUJO Y MANEJO DE LOS OTROS THREADS
 {
     ALLEGRO_EVENT_QUEUE* queue=(ALLEGRO_EVENT_QUEUE*)event_queue;
     _exit_=true;
