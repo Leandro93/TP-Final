@@ -1,0 +1,59 @@
+K 25
+svn:wc:ra_dav:version-url
+V 50
+/svn/!svn/ver/112/trunk/twitterClient/include/curl
+END
+mprintf.h
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/svn/!svn/ver/112/trunk/twitterClient/include/curl/mprintf.h
+END
+curlrules.h
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/!svn/ver/112/trunk/twitterClient/include/curl/curlrules.h
+END
+easy.h
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svn/!svn/ver/112/trunk/twitterClient/include/curl/easy.h
+END
+curlver.h
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/svn/!svn/ver/112/trunk/twitterClient/include/curl/curlver.h
+END
+curl.h
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svn/!svn/ver/112/trunk/twitterClient/include/curl/curl.h
+END
+curlbuild.h
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/!svn/ver/112/trunk/twitterClient/include/curl/curlbuild.h
+END
+stdcheaders.h
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/!svn/ver/112/trunk/twitterClient/include/curl/stdcheaders.h
+END
+typecheck-gcc.h
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svn/!svn/ver/112/trunk/twitterClient/include/curl/typecheck-gcc.h
+END
+multi.h
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/!svn/ver/112/trunk/twitterClient/include/curl/multi.h
+END

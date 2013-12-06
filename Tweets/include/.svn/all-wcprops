@@ -1,0 +1,17 @@
+K 25
+svn:wc:ra_dav:version-url
+V 45
+/svn/!svn/ver/112/trunk/twitterClient/include
+END
+oauthlib.h
+K 25
+svn:wc:ra_dav:version-url
+V 56
+/svn/!svn/ver/112/trunk/twitterClient/include/oauthlib.h
+END
+twitcurl.h
+K 25
+svn:wc:ra_dav:version-url
+V 56
+/svn/!svn/ver/112/trunk/twitterClient/include/twitcurl.h
+END

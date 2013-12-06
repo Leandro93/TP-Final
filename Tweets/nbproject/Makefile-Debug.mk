@@ -14,7 +14,7 @@ GREP=grep
 NM=nm
 CCADMIN=CCadmin
 RANLIB=ranlib
-CC=g++
+CC=gcc
 CCC=g++
 CXX=g++
 FC=gfortran
@@ -35,15 +35,16 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 
 # Object Files
 OBJECTFILES= \
-	${OBJECTDIR}/main.o
+	${OBJECTDIR}/_ext/1976688956/main.o \
+	${OBJECTDIR}/CTweets.o
 
 
 # C Compiler Flags
 CFLAGS=
 
 # CC Compiler Flags
-CCFLAGS=
-CXXFLAGS=
+CCFLAGS=-std=c++0x
+CXXFLAGS=-std=c++0x
 
 # Fortran Compiler Flags
 FFLAGS=
@@ -52,7 +53,7 @@ FFLAGS=
 ASFLAGS=
 
 # Link Libraries and Options
-LDLIBSOPTIONS=
+LDLIBSOPTIONS=-L../../twitcurl1/lib -ltwitcurl -ljson_linux-gcc-4.6_libmt
 
 # Build Targets
 .build-conf: ${BUILD_SUBPROJECTS}
@@ -60,12 +61,17 @@ LDLIBSOPTIONS=
 
 ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/tweets: ${OBJECTFILES}
 	${MKDIR} -p ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}
-	gcc -o ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/tweets ${OBJECTFILES} ${LDLIBSOPTIONS} -lpthread -lallegro -lallegro_primitives -lallegro_ttf -lallegro_font
+	${LINK.cc} -o ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/tweets ${OBJECTFILES} ${LDLIBSOPTIONS}
 
-${OBJECTDIR}/main.o: main.c 
+${OBJECTDIR}/_ext/1976688956/main.o: /home/leandro/NetBeansProjects/Tweets/main.cpp 
+	${MKDIR} -p ${OBJECTDIR}/_ext/1976688956
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/1976688956/main.o /home/leandro/NetBeansProjects/Tweets/main.cpp
+
+${OBJECTDIR}/CTweets.o: CTweets.cpp 
 	${MKDIR} -p ${OBJECTDIR}
-	${RM} $@.d
-	$(COMPILE.c) -MMD -MP -MF $@.d -o ${OBJECTDIR}/main.o main.c
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/CTweets.o CTweets.cpp
 
 # Subprojects
 .build-subprojects:
