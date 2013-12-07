@@ -11,9 +11,9 @@ char s3_text[TWEET_SIZE+1];
 Uint s1_ready=false;
 Uint s2_ready=false;
 Uint s3_ready=false;
-CTweet s1_array[BUFFER_SIZE];
-CTweet s2_array[BUFFER_SIZE];
-CTweet s3_array[BUFFER_SIZE];
+CT s1_array[BUFFER_SIZE];
+CT s2_array[BUFFER_SIZE];
+CT s3_array[BUFFER_SIZE];
 
 ////////////////////FUNCIONES DE INTERFAZ////////////////////
 BOOL get_exit_state(void)
@@ -85,7 +85,7 @@ BOOL write_search_ready(char search_num,BOOL new_state)
     return 0;
 }
 
-CTweet* get_search_array(char search_num)
+pCT get_search_array(char search_num)
 {
     switch(search_num)
     {
@@ -100,9 +100,9 @@ CTweet* get_search_array(char search_num)
     }
 }
 
-BOOL write_search_array(char search_num,CTweet* new_array,Uint items_num)
+BOOL write_search_array(char search_num,pCT new_array,Uint items_num)
 {
-    CTweet*array=get_search_array(search_num);
+    pCT array=get_search_array(search_num);
     if(array==NULL) return ERROR;
     Uint i;
     for(i=0;i<items_num;i++)

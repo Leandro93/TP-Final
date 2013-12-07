@@ -6,7 +6,7 @@
 typedef char BOOL;
 typedef unsigned int Uint;
 
-//Devuelve true solamente despues de usar exit_threads.
+//Devuelve true solamente despues de usar exit_threads().
 BOOL get_exit_state(void);
 //exit=true
 void exit_threads(void);
@@ -19,9 +19,9 @@ Uint get_search_ready(char search_num);
 //Devuelve 1 si no exite search asociado a search_num, sino devuelve 0.
 BOOL write_search_ready(char search_num,BOOL new_state);
 //Devuelve NULL si no existe search asociado a search_num.
-CTweet* get_search_array(char search_num);
+pCT get_search_array(char search_num);
 //Devuelve 1 si no exite search asociado a search_num, sino devuelve 0.
-BOOL write_search_array(char search_num,CTweet* new_array,Uint items_num);
+BOOL write_search_array(char search_num,pCT new_array,Uint items_num);
 
 #endif
 

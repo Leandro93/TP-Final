@@ -24,6 +24,8 @@ typedef struct CTweet {
 	Location loc;	//lat = 0, long = 0 if tweet's not geotagged
 } CTweet;
 
+typedef CTweet CT;
+typedef CT* pCT;
 
 int     CT_init            (char *err);
 

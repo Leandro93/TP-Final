@@ -1,13 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <pthread.h>
 #include <math.h>
+#include <pthread.h>
+#include "threads_intercommunication.h"
 #include <allegro5/allegro5.h>
 #include <allegro5/allegro_primitives.h>
 #include <allegro5/allegro_ttf.h>
 #include <allegro5/allegro_font.h>
 #include "CTweets.h"
-#include "threads_intercommunication.h"
 
 #define TEST
 
@@ -49,6 +49,18 @@ int main(void)
     shutdown_allegro(display);
     return 0;
 }
+/*MAIN RETURN LIST
+ * 0 - OK.
+ * 1 - Could not initialize Allegro.
+ * 2 - Could not initialize Allegro primitives addon.
+ * 3 - Failed to initialize mouse.
+ * 4 - Failed to install keyboard.
+ * 5 - Could not create window.
+ * 6 - Initialization of Allegro ttf addon failed. 
+ * 7 - Failed to create event queue.
+ * 8 - Could not connect to Twitter/get OAuth.
+ * 9 - Could not create threads.
+ */
 
 ////////////////////THREADS////////////////////
 void start_threads(ALLEGRO_EVENT_QUEUE*event_queue,ALLEGRO_DISPLAY*display)
@@ -67,14 +79,14 @@ void start_threads(ALLEGRO_EVENT_QUEUE*event_queue,ALLEGRO_DISPLAY*display)
         fprintf(stderr,"pthread_create failed\n");
         exit(9);
     }
-    pthread_join(main_loop_thread,NULL);
+    pthread_join(search_thread,NULL);
 }
 
 void *search(void*)
 {
     char*err;
     Uint count;
-    CTweet*search1_buffer,*search2_buffer,*search3_buffer;
+    pCT search1_buffer,search2_buffer,search3_buffer;
     while(!get_exit_state())
     {
         if(!get_search_ready(1)&&get_search_text(1)[0])
@@ -111,7 +123,7 @@ void *search(void*)
     }
 }
 
-void *main_loop(void*event_queue)
+void *main_loop(void*event_queue)       //INCLUYE CODIGO DE PRUEBA PARA QUE SEPAN COMO HACER LAS BUSQUEDAS Y SACAR LA INFO.
 {
     #ifdef TEST
     new_search_text(1,(char*)"love");
@@ -120,16 +132,16 @@ void *main_loop(void*event_queue)
     #endif
     ALLEGRO_EVENT_QUEUE* queue=(ALLEGRO_EVENT_QUEUE*)event_queue;
     Uint i;
-    CTweet* search_array;
+    pCT search_array;
     while(FOREVER)
     {
-        if(get_search_ready(1))
+        if(get_search_ready(1))         //SI YA SE REALIZO LA BUSQUEDA.
         {
-            search_array=get_search_array(1);
-            for(i=0;i<get_search_ready(1);i++)
+            search_array=get_search_array(1);   //EL ARREGLO CON LOS RESULTADOS DE LA BUSQUEDA.
+            for(i=0;i<get_search_ready(1);i++)  //EL SEARCH READY ES A SU VEZ LA CANTIDAD DE RESULTADOS.
             {
                 #ifndef TEST
-                if(search_array[i].loc.latitude<9000)
+                if(search_array[i].loc.latitude<9000)   //FILTRAR LOS RESULTADOS SIN GEOTAG(MODIFIQUE PARA QUE EN LUGAR DE 0 SEA 10000 LAS COORDENADAS).
                 #endif
                 {
                     #ifdef TEST
@@ -139,12 +151,12 @@ void *main_loop(void*event_queue)
                     printf("lang: %s\n"     , search_array[i].lang);
                     printf("lat:  %f\n"     , search_array[i].loc.latitude );
                     printf("long: %f\n\n"   , search_array[i].loc.longitude);
-                    fflush(stdout);
+                    fflush(stdout);                     //ESTO ESTA PORQUE TARDABA EN MOSTRAR LAS COSAS POR LA VELOCIDAD EN LA QUE SE ACTUALIZAN.
                     sleep(SLEEP);
                     #endif
                 }
             }
-            write_search_ready(1,false);
+            write_search_ready(1,false);        //LE DICE AL OTRO THREAD QUE BUSQUE MAS TWEETS.
         }
         if(get_search_ready(2))
         {
@@ -193,7 +205,7 @@ void *main_loop(void*event_queue)
             write_search_ready(3,false);
         }
     }
-    exit_threads();
+    exit_threads();     //ESTO ES MUY IMPORTANTE, SINO NUNCA VA A TERMINAR EL OTRO THREAD.
 }
 
 ////////////////////CTweets////////////////////
@@ -244,6 +256,7 @@ ALLEGRO_DISPLAY * init_allegro(void)
         exit(5);
     }
     al_set_window_position(display,0,0);
+    al_set_window_title(display,"Tweets map.");
     al_init_font_addon();
     if(!al_init_ttf_addon())
     {
