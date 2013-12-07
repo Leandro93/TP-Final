@@ -1,6 +1,8 @@
 /*
  * CTweets
  */
+#ifndef CTWEETS_H
+#define	CTWEETS_H
 
 #include "include/json/json.h"
 #include "include/twitcurl.h"
@@ -42,6 +44,4 @@ CTweet *CT_search          (char *searchQuery, unsigned int *count, char *err);
 void    CT_searchReset     (void);
 
 void    CT_freeTweets      (CTweet *buffer);
-
-
-
+#endif

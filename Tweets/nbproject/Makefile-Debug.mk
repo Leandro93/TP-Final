@@ -36,6 +36,7 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 # Object Files
 OBJECTFILES= \
 	${OBJECTDIR}/_ext/1976688956/main.o \
+	${OBJECTDIR}/_ext/1976688956/threads_intercommunication.o \
 	${OBJECTDIR}/CTweets.o
 
 
@@ -67,6 +68,11 @@ ${OBJECTDIR}/_ext/1976688956/main.o: /home/leandro/NetBeansProjects/Tweets/main.
 	${MKDIR} -p ${OBJECTDIR}/_ext/1976688956
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/1976688956/main.o /home/leandro/NetBeansProjects/Tweets/main.cpp
+
+${OBJECTDIR}/_ext/1976688956/threads_intercommunication.o: /home/leandro/NetBeansProjects/Tweets/threads_intercommunication.cpp 
+	${MKDIR} -p ${OBJECTDIR}/_ext/1976688956
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/1976688956/threads_intercommunication.o /home/leandro/NetBeansProjects/Tweets/threads_intercommunication.cpp
 
 ${OBJECTDIR}/CTweets.o: CTweets.cpp 
 	${MKDIR} -p ${OBJECTDIR}

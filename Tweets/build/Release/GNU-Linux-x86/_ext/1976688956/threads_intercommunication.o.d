@@ -1,5 +1,6 @@
-build/Release/GNU-Linux-x86/_ext/1976688956/main.o: \
- /home/leandro/NetBeansProjects/Tweets/main.cpp \
+build/Release/GNU-Linux-x86/_ext/1976688956/threads_intercommunication.o: \
+ /home/leandro/NetBeansProjects/Tweets/threads_intercommunication.cpp \
+ /home/leandro/NetBeansProjects/Tweets/threads_intercommunication.h \
  /home/leandro/NetBeansProjects/Tweets/CTweets.h \
  /home/leandro/NetBeansProjects/Tweets/include/json/json.h \
  /home/leandro/NetBeansProjects/Tweets/include/json/autolink.h \
@@ -17,8 +18,9 @@ build/Release/GNU-Linux-x86/_ext/1976688956/main.o: \
  /home/leandro/NetBeansProjects/Tweets/include/curl/curlrules.h \
  /home/leandro/NetBeansProjects/Tweets/include/curl/easy.h \
  /home/leandro/NetBeansProjects/Tweets/include/curl/multi.h \
- /home/leandro/NetBeansProjects/Tweets/include/curl/curl.h \
- /home/leandro/NetBeansProjects/Tweets/threads_intercommunication.h
+ /home/leandro/NetBeansProjects/Tweets/include/curl/curl.h
+
+/home/leandro/NetBeansProjects/Tweets/threads_intercommunication.h:
 
 /home/leandro/NetBeansProjects/Tweets/CTweets.h:
 
@@ -55,5 +57,3 @@ build/Release/GNU-Linux-x86/_ext/1976688956/main.o: \
 /home/leandro/NetBeansProjects/Tweets/include/curl/multi.h:
 
 /home/leandro/NetBeansProjects/Tweets/include/curl/curl.h:
-
-/home/leandro/NetBeansProjects/Tweets/threads_intercommunication.h:

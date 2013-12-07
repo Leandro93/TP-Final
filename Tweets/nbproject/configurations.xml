@@ -40,6 +40,8 @@
       <itemPath>CTweets.cpp</itemPath>
       <itemPath>CTweets.h</itemPath>
       <itemPath>/home/leandro/NetBeansProjects/Tweets/main.cpp</itemPath>
+      <itemPath>/home/leandro/NetBeansProjects/Tweets/threads_intercommunication.cpp</itemPath>
+      <itemPath>/home/leandro/NetBeansProjects/Tweets/threads_intercommunication.h</itemPath>
     </logicalFolder>
     <logicalFolder name="TestFiles"
                    displayName="Test Files"
@@ -81,6 +83,16 @@
       <item path="/home/leandro/NetBeansProjects/Tweets/main.cpp"
             ex="false"
             tool="1"
+            flavor2="0">
+      </item>
+      <item path="/home/leandro/NetBeansProjects/Tweets/threads_intercommunication.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="/home/leandro/NetBeansProjects/Tweets/threads_intercommunication.h"
+            ex="false"
+            tool="3"
             flavor2="0">
       </item>
       <item path="CTweets.cpp" ex="false" tool="1" flavor2="0">
@@ -172,6 +184,16 @@
       <item path="/home/leandro/NetBeansProjects/Tweets/main.cpp"
             ex="false"
             tool="1"
+            flavor2="0">
+      </item>
+      <item path="/home/leandro/NetBeansProjects/Tweets/threads_intercommunication.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="/home/leandro/NetBeansProjects/Tweets/threads_intercommunication.h"
+            ex="false"
+            tool="3"
             flavor2="0">
       </item>
       <item path="CTweets.cpp" ex="false" tool="1" flavor2="0">

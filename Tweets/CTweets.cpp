@@ -119,8 +119,8 @@ CTweet *CT_search(char *searchQuery, unsigned int *count, char *err){
                                     
                                     
                                     if(results[i]["geo"].isNull()){
-                                        t[i].loc.latitude  = 0;
-                                        t[i].loc.longitude = 0;
+                                        t[i].loc.latitude  = 10000;
+                                        t[i].loc.longitude = 10000;
                                     }
                                     else {
                                         if (results[i]["geo"]["coordinates"].isArray()){                                    

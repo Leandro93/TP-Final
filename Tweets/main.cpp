@@ -7,12 +7,12 @@
 #include <allegro5/allegro_ttf.h>
 #include <allegro5/allegro_font.h>
 #include "CTweets.h"
+#include "threads_intercommunication.h"
 
-typedef char BOOL;
-typedef unsigned int Uint;
+#define TEST
 
 #define FOREVER true
-#define BUFFER_SIZE 1
+#define SLEEP 0.2
 
 #define WIDTH 800
 #define HEIGHT 600
@@ -30,23 +30,9 @@ typedef unsigned int Uint;
 #define COLOR(x) al_map_rgb(x)
 #define RGB(r,g,b) al_map_rgb(r,g,b)
 
-////////////////////VARIABLES COMPARTIDAS ENTRE THREADS////////////////////
-BOOL Exit=false;      //HABRIA QUE AGREGAR ESTAS VARIABLES EN UN ARCHIVO APARTE
-char *search1_text=(char*)"xmas";
-char *search2_text=(char*)"happy";
-char *search3_text=(char*)"love";
-Uint search1_ready=false;
-Uint search2_ready=false;
-Uint search3_ready=false;
-CTweet *search1_buffer=NULL;
-CTweet *search2_buffer=NULL;
-CTweet *search3_buffer=NULL;
-
 ////////////////////PROTOTIPOS////////////////////
 void start_threads(ALLEGRO_EVENT_QUEUE*event_queue,ALLEGRO_DISPLAY*display);
-void *search1(void*);
-void *search2(void*);
-void *search3(void*);
+void *search(void*);
 void *main_loop(void*event_queue);
 void init_CTweets(void);
 ALLEGRO_DISPLAY * init_allegro(void);
@@ -57,7 +43,6 @@ ALLEGRO_EVENT_QUEUE *create_event_queue(ALLEGRO_DISPLAY*display);
 int main(void)
 {
     init_CTweets();
-    CT_searchReset();
     ALLEGRO_DISPLAY*display=init_allegro();
     ALLEGRO_EVENT_QUEUE*event_queue=create_event_queue(display);
     start_threads(event_queue,display);
@@ -68,20 +53,8 @@ int main(void)
 ////////////////////THREADS////////////////////
 void start_threads(ALLEGRO_EVENT_QUEUE*event_queue,ALLEGRO_DISPLAY*display)
 {
-    pthread_t search1_thread,search2_thread,search3_thread,main_loop_thread;
-    if(pthread_create(&search1_thread,NULL,&search1,NULL))
-    {
-        shutdown_allegro(display);
-        fprintf(stderr,"pthread_create failed\n");
-        exit(9);
-    }
-    if(pthread_create(&search2_thread,NULL,&search2,NULL))
-    {
-        shutdown_allegro(display);
-        fprintf(stderr,"pthread_create failed\n");
-        exit(9);
-    }
-    if(pthread_create(&search3_thread,NULL,&search3,NULL))
+    pthread_t search_thread,main_loop_thread;
+    if(pthread_create(&search_thread,NULL,&search,NULL))
     {
         shutdown_allegro(display);
         fprintf(stderr,"pthread_create failed\n");
@@ -97,124 +70,130 @@ void start_threads(ALLEGRO_EVENT_QUEUE*event_queue,ALLEGRO_DISPLAY*display)
     pthread_join(main_loop_thread,NULL);
 }
 
-void *search1(void*)    //SOLO BUSCAN Y COLOCAN EN EL ARREGLO LOS RESULTADOS Y EN EL READY EL NUMERO DE RESULTADOS ENCONTRADOS
-{
-    char*err=NULL;
-    Uint count;
-    while(!Exit)
-    {
-        if(!search1_ready&&search1_text!=NULL)
-        {
-            count=BUFFER_SIZE;
-            search1_buffer=CT_search(search1_text,&count,err);
-            if((err==NULL)&&(search1_buffer!=NULL))
-                search1_ready=count;
-        }
-        if(count>2) sleep(1.0/count);
-        else sleep(0.5);
-    }
-}
-
-void *search2(void*)
+void *search(void*)
 {
     char*err;
     Uint count;
-    while(!Exit)
+    CTweet*search1_buffer,*search2_buffer,*search3_buffer;
+    while(!get_exit_state())
     {
-        if(!search2_ready&&search2_text!=NULL)
+        if(!get_search_ready(1)&&get_search_text(1)[0])
         {
             count=BUFFER_SIZE;
-            search2_buffer=CT_search(search2_text,&count,err);
-            if((err==NULL)&&(search2_buffer!=NULL))
-                search2_ready=count;
+            search1_buffer=CT_search(get_search_text(1),&count,err);
+            if((err==NULL)&&(search1_buffer!=NULL)&&count)
+            {
+                write_search_array(1,search1_buffer,count);
+                write_search_ready(1,count);
+            }
         }
-        if(count>2) sleep(1.0/count);
-        else sleep(0.5);
+        if(!get_search_ready(2)&&get_search_text(2)[0])
+        {
+            count=BUFFER_SIZE;
+            search2_buffer=CT_search(get_search_text(2),&count,err);
+            if((err==NULL)&&(search2_buffer!=NULL)&&count)
+            {
+                write_search_array(2,search2_buffer,count);
+                write_search_ready(2,count);
+            }
+        }
+        if(!get_search_ready(3)&&get_search_text(3)[0])
+        {
+            count=BUFFER_SIZE;
+            search3_buffer=CT_search(get_search_text(3),&count,err);
+            if((err==NULL)&&(search3_buffer!=NULL)&&count)
+            {
+                write_search_array(3,search3_buffer,count);
+                write_search_ready(3,count);
+            }
+        }
+        sleep(SLEEP);
     }
 }
 
-void *search3(void*)
+void *main_loop(void*event_queue)
 {
-    char*err;
-    Uint count;
-    while(!Exit)
-    {
-        if(!search3_ready&&search3_text!=NULL)
-        {
-            count=BUFFER_SIZE;
-            search3_buffer=CT_search(search3_text,&count,err);
-            if((err==NULL)&&(search3_buffer!=NULL))
-                search3_ready=count;
-        }
-        if(count>2) sleep(1.0/count);
-        else sleep(0.5);
-    }
-}
-
-//AL REALIZAR MAS DE UNA BUSQUEDA SIMULTANEA EVENTUALMENTE COLAPSA
-void *main_loop(void*event_queue)      //THREAD QUE CONTIENE LAS FUNCIONES DE DIBUJO Y MANEJO DE LOS OTROS THREADS
-{
+    #ifdef TEST
+    new_search_text(1,(char*)"love");
+    new_search_text(2,(char*)"xmas");
+    new_search_text(3,(char*)"happy");
+    #endif
     ALLEGRO_EVENT_QUEUE* queue=(ALLEGRO_EVENT_QUEUE*)event_queue;
     Uint i;
+    CTweet* search_array;
     while(FOREVER)
     {
-        if(search1_ready)
+        if(get_search_ready(1))
         {
-            for(i=0;i<search1_ready;i++)
+            search_array=get_search_array(1);
+            for(i=0;i<get_search_ready(1);i++)
             {
-                //if(search1_buffer[i].loc.latitude||search1_buffer[i].loc.longitude)
+                #ifndef TEST
+                if(search_array[i].loc.latitude<9000)
+                #endif
                 {
-                    printf("user: %s\n"     , search1_buffer[i].user);
-                    printf("userName: %s\n" , search1_buffer[i].userName);
-                    printf("text: %s\n"     , search1_buffer[i].text);
-                    printf("lang: %s\n"     , search1_buffer[i].lang);
-                    printf("lat:  %f\n"     , search1_buffer[i].loc.latitude );
-                    printf("long: %f\n\n"   , search1_buffer[i].loc.longitude);
+                    #ifdef TEST
+                    printf("user: %s\n"     , search_array[i].user);
+                    printf("userName: %s\n" , search_array[i].userName);
+                    printf("text: %s\n"     , search_array[i].text);
+                    printf("lang: %s\n"     , search_array[i].lang);
+                    printf("lat:  %f\n"     , search_array[i].loc.latitude );
+                    printf("long: %f\n\n"   , search_array[i].loc.longitude);
                     fflush(stdout);
-                    sleep(0.2);
+                    sleep(SLEEP);
+                    #endif
                 }
             }
-            search1_ready=false;
+            write_search_ready(1,false);
         }
-        if(search2_ready)
+        if(get_search_ready(2))
         {
-            for(i=0;i<search2_ready;i++)
+            search_array=get_search_array(2);
+            for(i=0;i<get_search_ready(2);i++)
             {
-                //if(search2_buffer[i].loc.latitude||search2_buffer[i].loc.longitude)
+                #ifndef TEST
+                if(search_array[i].loc.latitude<9000)
+                #endif
                 {
-                    printf("user: %s\n"     , search2_buffer[i].user);
-                    printf("userName: %s\n" , search2_buffer[i].userName);
-                    printf("text: %s\n"     , search2_buffer[i].text);
-                    printf("lang: %s\n"     , search2_buffer[i].lang);
-                    printf("lat:  %f\n"     , search2_buffer[i].loc.latitude );
-                    printf("long: %f\n\n"   , search2_buffer[i].loc.longitude);
+                    #ifdef TEST
+                    printf("user: %s\n"     , search_array[i].user);
+                    printf("userName: %s\n" , search_array[i].userName);
+                    printf("text: %s\n"     , search_array[i].text);
+                    printf("lang: %s\n"     , search_array[i].lang);
+                    printf("lat:  %f\n"     , search_array[i].loc.latitude );
+                    printf("long: %f\n\n"   , search_array[i].loc.longitude);
                     fflush(stdout);
-                    sleep(0.2);
+                    sleep(SLEEP);
+                    #endif
                 }
             }
-            search2_ready=false;
+            write_search_ready(2,false);
         }
-        if(search3_ready)
+        if(get_search_ready(3))
         {
-            for(i=0;i<search3_ready;i++)
+            search_array=get_search_array(3);
+            for(i=0;i<get_search_ready(3);i++)
             {
-                //if(search3_buffer[i].loc.latitude||search3_buffer[i].loc.longitude)
+                #ifndef TEST
+                if(search_array[i].loc.latitude<9000)
+                #endif
                 {
-                    printf("user: %s\n"     , search3_buffer[i].user);
-                    printf("userName: %s\n" , search3_buffer[i].userName);
-                    printf("text: %s\n"     , search3_buffer[i].text);
-                    printf("lang: %s\n"     , search3_buffer[i].lang);
-                    printf("lat:  %f\n"     , search3_buffer[i].loc.latitude );
-                    printf("long: %f\n\n"   , search3_buffer[i].loc.longitude);
+                    #ifdef TEST
+                    printf("user: %s\n"     , search_array[i].user);
+                    printf("userName: %s\n" , search_array[i].userName);
+                    printf("text: %s\n"     , search_array[i].text);
+                    printf("lang: %s\n"     , search_array[i].lang);
+                    printf("lat:  %f\n"     , search_array[i].loc.latitude );
+                    printf("long: %f\n\n"   , search_array[i].loc.longitude);
                     fflush(stdout);
-                    sleep(0.2);
+                    sleep(SLEEP);
+                    #endif
                 }
             }
-            search3_ready=false;
+            write_search_ready(3,false);
         }
-        sleep(0.5);
     }
-    Exit=true;
+    exit_threads();
 }
 
 ////////////////////CTweets////////////////////
