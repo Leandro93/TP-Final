@@ -45,7 +45,7 @@ void main_loop(ALLEGRO_DISPLAY*display,ALLEGRO_BITMAP*world,ALLEGRO_FONT*font,AL
 void init_CTweets(void);
 void init_allegro(ALLEGRO_DISPLAY**display,ALLEGRO_BITMAP**world,ALLEGRO_FONT**font,ALLEGRO_EVENT_QUEUE**event_queue);
 void shutdown_allegro(ALLEGRO_DISPLAY*display,ALLEGRO_BITMAP*world,ALLEGRO_FONT*font);
-void get_continents(int search_ready,CTweet*search_array,Uint*continents,Location*puntos,Uint i);
+void get_continents(int search_ready,CTweet*search_array,Uint*continents);
 
 ////////////////////MAIN////////////////////
 int main(void)
@@ -327,12 +327,40 @@ void main_loop(ALLEGRO_DISPLAY*display,ALLEGRO_BITMAP*world,ALLEGRO_FONT*font,AL
         al_draw_text(font,al_map_rgb(255,255,255),XBOX+20,YBOX+75,ALLEGRO_ALIGN_LEFT,text3);
         al_draw_text(font,al_map_rgb(255,255,255),XBOX+20,YBOX+50,ALLEGRO_ALIGN_LEFT,text2);
         if(get_search_ready(1))
-            get_continents(get_search_ready(1),get_search_array(1),continentes1,puntos1,j);
+        {
+            get_continents(get_search_ready(1),get_search_array(1),continentes1);
+            puntos1[j].latitude=get_search_array(1)[0].loc.latitude;
+            puntos1[j].longitude=get_search_array(1)[0].loc.longitude;
+        }
+        else
+        {
+            puntos1[j].latitude=10000;
+            puntos1[j].longitude=10000;
+        }
         if(get_search_ready(2))
-            get_continents(get_search_ready(2),get_search_array(2),continentes2,puntos2,j);
+        {
+            get_continents(get_search_ready(2),get_search_array(2),continentes2);
+            puntos2[j].latitude=get_search_array(2)[0].loc.latitude;
+            puntos2[j].longitude=get_search_array(2)[0].loc.longitude;
+        }
+        else
+        {
+            puntos2[j].latitude=10000;
+            puntos2[j].longitude=10000;
+        }
         if(get_search_ready(3))
-            get_continents(get_search_ready(3),get_search_array(3),continentes3,puntos3,j);
-        if((++j)==(int)(FADE/SLEEP))j=0;
+        {
+            get_continents(get_search_ready(3),get_search_array(3),continentes3);
+            puntos3[j].latitude=get_search_array(3)[0].loc.latitude;
+            puntos3[j].longitude=get_search_array(3)[0].loc.longitude;
+        }
+        else
+        {
+            puntos3[j].latitude=10000;
+            puntos3[j].longitude=10000;
+        }
+        j++;
+        if(j==(int)(FADE/SLEEP))j=0;
         //AMERICA
         al_draw_filled_circle(150,170,RADIO*continentes1[0],COLOR(RED));
         al_draw_filled_circle(200,170,RADIO*continentes2[0],COLOR(BLUE));
@@ -411,7 +439,7 @@ void main_loop(ALLEGRO_DISPLAY*display,ALLEGRO_BITMAP*world,ALLEGRO_FONT*font,AL
 }
 
 ////////////////////FUNCIONES////////////////////
-void get_continents(int search_ready,CTweet*search_array,Uint*continents,dot*puntos,Uint i)
+void get_continents(int search_ready,CTweet*search_array,Uint*continents)
 {
     Uint k;
     for(k=0;k<search_ready;k++)
@@ -428,8 +456,6 @@ void get_continents(int search_ready,CTweet*search_array,Uint*continents,dot*pun
             continents[4]++;
         if((search_array[k].loc.latitude<-60))
             continents[5]++;
-        puntos[i].latitude=search_array[k].loc.latitude;
-        puntos[i].longitude=search_array[k].loc.longitude;
     }
 }
 
