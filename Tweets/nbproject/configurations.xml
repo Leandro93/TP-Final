@@ -166,7 +166,7 @@
             <linkerLibStdlibItem>PosixThreads</linkerLibStdlibItem>
             <linkerLibStdlibItem>Mathematics</linkerLibStdlibItem>
           </linkerLibItems>
-          <commandLine>-lallegro -lallegro_primitives -lallegro_ttf -lallegro_font</commandLine>
+          <commandLine>-lallegro -lallegro_primitives -lallegro_ttf -lallegro_font -lallegro_image</commandLine>
         </linkerTool>
       </compileType>
       <packaging>

@@ -2,7 +2,6 @@
 #define	THREADS_INTERCOMMUNICATION_H
 #include "CTweets.h"
 
-#define BUFFER_SIZE 5
 typedef char BOOL;
 typedef unsigned int Uint;
 

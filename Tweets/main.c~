@@ -1,0 +1,538 @@
+#include <stdio.h>
+#include <math.h>
+#include <allegro5/allegro5.h>
+#include <allegro5/allegro_primitives.h>
+#include <allegro5/allegro_audio.h>
+#include <allegro5/allegro_acodec.h>
+#include <allegro5/allegro_font.h>
+#include <allegro5/allegro_ttf.h>
+#include <allegro5/allegro_image.h>
+
+typedef char BOOL;
+
+#define T_SIZE 582.3
+#define TOLERANCE (unsigned int)(log(T_SIZE)/log(3))
+
+#define W_SIZE(x) (int)((x)*2/sqrt(3))
+#define FPS 10
+#define SPEED 1.0/5.0
+
+#define BLACK 0,0,0
+#define WHITE 255,255,255
+#define RED 255,10,10
+#define GREEN 0,150,0
+#define BLUE 10,10,55
+#define YELLOW 255,255,0
+#define CYAN 0,255,255
+#define VIOLET 150,0,150
+#define UBUNTU_TERMINAL 48,10,36
+#define COLOR(x) al_map_rgb(x)
+#define RGB(r,g,b) al_map_rgb(r,g,b)
+#define BACKGROUND COLOR(BLACK)
+#define FOREGROUND RGB(98,171,181)
+#define NUM_BUTTONS  3
+#define XBOX 10
+#define YBOX -25
+#define NOSEARCH 42
+#define URLDIF 12
+#define BACKSPACE 8
+#define CIN 31 //caracter no imprimible
+
+typedef struct{
+        float side;
+        float x;
+        float y;
+        BOOL up_down;
+        ALLEGRO_COLOR color;
+}TRIANGLE;
+#define UP 1
+#define DOWN !UP
+
+typedef struct Location {
+    double longitude;
+    double latitude;
+} Location;
+
+typedef struct CTweet {
+	char *user;
+	char *userName;	
+	char *text;
+	char *lang;	//http://en.wikipedia.org/wiki/IETF_language_tag, or "und" if no language could be detected.
+                        //See the list of available languages here: http://www.iana.org/assignments/language-subtag-registry/language-subtag-registry
+	Location loc;	//lat = 0, long = 0 if tweet's not geotagged
+} CTweet;
+
+//FUNCIONES
+
+void show(void);
+
+void main_loop(ALLEGRO_EVENT_QUEUE *event_queue,ALLEGRO_FONT *font,ALLEGRO_BITMAP *world);
+void init_allegro(void);
+ALLEGRO_DISPLAY *create_display(float size);
+
+void init_keyboard(void);
+void shutdown_allegro(ALLEGRO_DISPLAY *display);
+ALLEGRO_EVENT_QUEUE *create_event_queue(ALLEGRO_DISPLAY *display);
+
+
+void clear_string(char *string);
+void purl(char*);
+void get_continents(int search_ready,CTweet *search_array,int *continents);
+
+int main(int argc,char** argv)
+{
+
+    
+    init_allegro();
+    
+
+    ALLEGRO_COLOR color;
+                                      
+  
+    ALLEGRO_BITMAP *world = NULL;
+    
+    world= al_load_bitmap("worldmap.png");
+    if(world==NULL)
+        exit(1);
+
+ 
+  
+    
+    ALLEGRO_FONT *font = al_load_ttf_font("stocky.ttf",20,0 );
+     if (!font){
+      fprintf(stderr, "Could not load 'pirulen.ttf'.\n");
+      return -1;
+   }
+    init_keyboard();
+    ALLEGRO_DISPLAY *display;
+     display = al_create_display(900, 500);
+   if (!display) {
+       exit(111);
+   }
+    ALLEGRO_EVENT_QUEUE *event_queue=create_event_queue(display);
+       ALLEGRO_MOUSE_STATE msestate;
+   ALLEGRO_KEYBOARD_STATE kbdstate;
+   int i;
+   
+
+     //   al_draw_text(font, al_map_rgb(255,255,255), 640/2, (480/4),ALLEGRO_ALIGN_CENTRE, text);
+     
+
+   al_hide_mouse_cursor(display);
+    
+    al_flip_display();
+      /* do {
+      al_get_mouse_state(&msestate);
+      al_get_keyboard_state(&kbdstate);
+      
+
+      al_clear_to_color(al_map_rgb(0xff, 0xff, 0xc0));
+      for (i = 1; i <= NUM_BUTTONS; i++) {
+         draw_mouse_button(i, al_mouse_button_down(&msestate, i));*/
+    al_draw_bitmap(world, 0, 0, 0);
+        al_flip_display();
+    main_loop(event_queue,font,world);
+    shutdown_allegro(display);
+    return 0;
+}
+
+
+void show(void)
+{
+    al_flip_display();
+}
+
+
+
+void main_loop(ALLEGRO_EVENT_QUEUE *event_queue,ALLEGRO_FONT *font,ALLEGRO_BITMAP *world)
+{
+    
+    unsigned int i;
+    unsigned int urli;
+   
+    //MUCHAS DE ESTAS COSAS ESTAN ECHAS PARA PROBAR EN EL DEFINITIVO HAY QUE SACARLAS
+    CTweet *search1_array;
+    CTweet *search2_array;
+    CTweet *search3_array;
+    search1_array=(CTweet*)calloc(20,sizeof(CTweet));
+    search2_array=(CTweet*)calloc(20,sizeof(CTweet));
+    search3_array=(CTweet*)calloc(20,sizeof(CTweet));
+    int*continentes1,*continentes2,*continentes3;
+    continentes1=(int*)calloc(6,4);                     //ESTOS TIENEN LA CANTIDAD DE PERSONAS EN CADA CONTINENTE QUE TUITEARON LA BUSQUEDA
+    continentes2=(int*)calloc(6,4);
+    continentes3=(int*)calloc(6,4);
+    //0=AMERICA 1=EUROPA 2=AFRICA 3=ASIA 4=OCEANIA 5=ANTARTIDA
+    bool buttons[NUM_BUTTONS] = {false};
+    ALLEGRO_EVENT event;
+    ALLEGRO_KEYBOARD_STATE kbdstate;
+    ALLEGRO_MOUSE_STATE msestate;
+    char text1[140]="Click here to start typing";
+    char text2[140];
+    char text3[140];
+    
+    //ESTOS SON LOS QUE ESTAN CON FORMATO URL
+    char search1_text[280];
+    char search2_text[280];
+    char search3_text[280];
+    clear_string(text2);
+    clear_string(text3);
+    clear_string(search1_text);
+    clear_string(search2_text);
+    clear_string(search3_text);
+    int search1_ready=1,search2_ready=1,search3_ready=1;                //estan en 1 para testear los circulos
+    //ESTAS VARIABLES NO ME ACUERDO SI LAS USO PERO ME DA MIEDO SACARLAS
+    char u;
+    int k;
+    char j=0;
+    char searchX_ready=NOSEARCH;
+    char *p2searchX_ready;
+    p2searchX_ready=&searchX_ready;
+    ALLEGRO_SAMPLE_ID sample1id,sample2id,sample3id,sample4id;  
+    
+    while(1)
+    {
+        //ESTO VE SI SE CLIQUEA EN LAS BARRAS DE BUSQUEDA
+        al_get_mouse_state(&msestate);
+        if((msestate.buttons)&&(msestate.x>20)&&(msestate.x<880)&&(msestate.y>0)&&(msestate.y<25))
+        {   searchX_ready =0;           //ESTO DICE CON CUAL DE LAS 3 BARRAS ESTA TRABAJANDO LA PARTE GRÁFICA            
+                clear_string(text1);
+                clear_string(search1_text);
+        i=0;
+        urli=0;
+        for(k=0;k<6;k++)
+        {
+                continentes1[k]=0;              //LIMPIO PARA NO SEGUIR GRAFICANDO LA BUSQUEDA ANTERIOR
+        }}
+        if((msestate.buttons)&&(msestate.x>20)&&(msestate.x<880)&&(msestate.y>25)&&(msestate.y<50))
+        {   searchX_ready =1;
+                clear_string(text2);
+                clear_string(search2_text);
+        i=0;
+        urli=0;
+        for(k=0;k<6;k++)
+        {
+                continentes2[k]=0;
+        }}
+        if((msestate.buttons)&&(msestate.x>20)&&(msestate.x<880)&&(msestate.y>50)&&(msestate.y<75))
+        {   searchX_ready =2;
+                clear_string(text3);
+                clear_string(search3_text);
+                i=0;
+        urli=0;
+        for(k=0;k<6;k++)
+        {
+                continentes3[k]=0;
+        }}
+        
+        
+        if(!al_is_event_queue_empty(event_queue))
+        {
+            al_get_next_event(event_queue,&event);
+            switch(event.type)
+            {
+                
+           
+                case ALLEGRO_EVENT_KEY_CHAR:
+                    if(event.keyboard.unichar>CIN){              
+                    switch(searchX_ready)
+                    {
+                        
+                        case 0:
+                                text1[i]=event.keyboard.unichar;
+                                //ESTO ES PARA LA CODIFICACIÓN URL
+                                if(((event.keyboard.unichar>=' ')&&(event.keyboard.unichar<='/'))||((event.keyboard.unichar>=':')&&(event.keyboard.unichar<='@'))||((event.keyboard.unichar>='[]')
+                                        &&(event.keyboard.unichar<='`'))||((event.keyboard.unichar>='{')&&(event.keyboard.unichar<=255)))
+                                {
+                                            search1_text[urli++]='%';
+                                            search1_text[urli++]=event.keyboard.unichar-URLDIF;
+                             
+                                  }else
+                                           search1_text[urli++]=event.keyboard.unichar;
+                                
+                                break;
+                        case 1:
+                                text2[i]=event.keyboard.unichar;
+                                if(((event.keyboard.unichar>=' ')&&(event.keyboard.unichar<='/'))||((event.keyboard.unichar>=':')&&(event.keyboard.unichar<='@'))||((event.keyboard.unichar>='[]')
+                                        &&(event.keyboard.unichar<='`'))||((event.keyboard.unichar>='{')&&(event.keyboard.unichar<=255)))
+                                {
+                                            search2_text[urli++]='%';
+                                            search2_text[urli++]=event.keyboard.unichar-URLDIF;
+                             
+                                  }else
+                                           search2_text[urli++]=event.keyboard.unichar;
+                                break;
+                        case 2:
+                                text3[i]=event.keyboard.unichar;
+                                if(((event.keyboard.unichar>=' ')&&(event.keyboard.unichar<='/'))||((event.keyboard.unichar>=':')&&(event.keyboard.unichar<='@'))||((event.keyboard.unichar>='[]')
+                                        &&(event.keyboard.unichar<='`'))||((event.keyboard.unichar>='{')&&(event.keyboard.unichar<=255)))
+                                {
+                                            search3_text[urli++]='%';
+                                            search3_text[urli++]=event.keyboard.unichar-URLDIF;
+                             
+                                  }else
+                                           search3_text[urli++]=event.keyboard.unichar;
+                                break;
+                    }
+                    i++;}
+                    break;
+                case ALLEGRO_EVENT_KEY_DOWN:
+                    switch(event.keyboard.keycode)
+                    {
+                        case ALLEGRO_KEY_ESCAPE:
+                        return;
+                        case ALLEGRO_KEY_ENTER:
+                            //mandar text a ctweets
+
+                            searchX_ready=NOSEARCH;
+                           
+                            break;
+                        case ALLEGRO_KEY_T:
+                            search1_ready=1;
+                            static int p=0;
+
+                            (search1_array[p++]).loc.longitude=25;
+
+                            break;
+                        case ALLEGRO_KEY_BACKSPACE:
+                            i--;
+                            urli--;
+                            switch(searchX_ready)
+                            {
+                                case 0:
+                                        text1[i]=0;
+                                        if(search1_text[urli-1]=='%')
+                                        {
+                                                search1_text[urli-1]=0;
+                                                search1_text[urli]=0;
+                                                urli--;
+                                        }else
+                                                search1_text[urli]=0;
+                                        break;
+                                case 1:
+                                        text2[i]=0;
+                                        if(search2_text[urli-1]=='%')
+                                        {
+                                                search2_text[urli-1]=0;
+                                                search2_text[urli]=0;
+                                                urli--;
+                                        }else
+                                                search2_text[urli]=0;
+                                        break;
+                                case 2:
+                                        text3[i]=0;
+                                        if(search3_text[urli-1]=='%')
+                                        {
+                                                search3_text[urli-1]=0;
+                                                search3_text[urli]=0;
+                                                urli--;
+                                         }else
+                                                search3_text[urli]=0;
+                                         break;
+                            }
+                    //keyevent(event,text,p2text_flag);
+                    }
+                    break;
+                        
+                case ALLEGRO_EVENT_DISPLAY_CLOSE: return;
+                default:;
+            }
+        }
+      al_clear_to_color(COLOR(WHITE));
+        al_draw_bitmap(world, 0, 50, 0);
+        al_draw_filled_rounded_rectangle(XBOX,YBOX+50,XBOX+880,YBOX+100,25,25,COLOR(GREEN));
+        al_draw_filled_rounded_rectangle(XBOX,YBOX+25,XBOX+880,YBOX+75,25,25,COLOR(BLUE));
+   al_draw_filled_rounded_rectangle(XBOX,YBOX,XBOX+880,YBOX+50,25,25,COLOR(RED));
+
+   al_draw_text(font, al_map_rgb(255,255,255), XBOX+20, YBOX+25,ALLEGRO_ALIGN_LEFT,text1);
+   al_draw_text(font, al_map_rgb(255,255,255), XBOX+20, YBOX+75,ALLEGRO_ALIGN_LEFT,text3);
+   al_draw_text(font, al_map_rgb(255,255,255), XBOX+20, YBOX+50,ALLEGRO_ALIGN_LEFT,text2);
+   al_draw_filled_rectangle(msestate.x,msestate.y,msestate.x+10,msestate.y+10,COLOR(BLACK));
+   get_continents(search1_ready,search1_array,continentes1);
+  get_continents(search2_ready,search2_array,continentes2);
+  get_continents(search3_ready,search3_array,continentes3);
+  
+   //AMERICA   
+
+   al_draw_filled_circle(150,170,continentes1[0],COLOR(RED));  
+
+       al_draw_filled_circle(200,170,continentes2[0],COLOR(BLUE));
+
+       al_draw_filled_circle(250,170,continentes3[0],COLOR(GREEN));
+   //EUROPA   
+ 
+   al_draw_filled_circle(428,176,continentes1[1],COLOR(RED));
+
+       al_draw_filled_circle(450,150,continentes2[1],COLOR(BLUE));
+
+       al_draw_filled_circle(470,120,continentes3[1],COLOR(GREEN));
+   //ANTARTIDA   
+  
+   al_draw_filled_circle(450,470,continentes1[5],COLOR(RED));
+
+       al_draw_filled_circle(400,470,continentes2[5],COLOR(BLUE));
+
+       al_draw_filled_circle(470,470,continentes3[5],COLOR(GREEN));
+   //AFRICA   
+  
+   al_draw_filled_circle(490,370,continentes1[2],COLOR(RED));
+
+       al_draw_filled_circle(500,250,continentes2[2],COLOR(BLUE));
+
+       al_draw_filled_circle(500,300,continentes3[2],COLOR(GREEN));
+   //ASIA 
+ 
+   al_draw_filled_circle(728,176,continentes1[3],COLOR(RED));
+
+       al_draw_filled_circle(750,150,continentes2[3],COLOR(BLUE));
+  
+       al_draw_filled_circle(670,180,continentes3[3],COLOR(GREEN));
+   //OCEANIA
+   
+   al_draw_filled_circle(728,376,continentes1[4],COLOR(RED));
+
+       al_draw_filled_circle(750,350,continentes2[4],COLOR(BLUE));
+
+       al_draw_filled_circle(770,380,continentes3[4],COLOR(GREEN));
+       search1_ready=0;
+       search2_ready=0;
+       search3_ready=0;
+   show();
+        al_rest(1/FPS);
+    }
+}
+
+void init_allegro(void)
+{
+     al_init_image_addon();
+    if(!al_init())
+    {
+        fprintf(stderr,"Could not init Allegro.\n");
+        exit(1);
+    }
+    if(!al_install_audio())
+    {
+     fprintf(stderr,"Could not init audio");   
+    }
+    
+    if(!al_init_acodec_addon())
+    {
+     fprintf(stderr,"Could not init audio codec");   
+    }    
+   al_init_font_addon(); // initialize the font addon
+   al_init_ttf_addon();// initialize the ttf (True Type Font) addon
+   al_install_mouse();
+ 
+}
+
+ALLEGRO_DISPLAY *create_display(float size)
+{
+    ALLEGRO_DISPLAY *display=al_create_display(W_SIZE(size),W_SIZE(size));
+    if(!display)
+    {
+        fprintf(stderr,"al_create_display failed\n");
+        al_uninstall_keyboard();
+        exit(2);
+    }
+    al_set_window_position(display,0,0);
+    al_init_primitives_addon();
+    al_set_window_title(display,"Koch Snowflake");
+    al_clear_to_color(BACKGROUND);
+    show();
+    return display;
+}
+
+void init_keyboard(void)
+{
+    if(!al_install_keyboard())
+    {
+        fprintf(stderr,"al_install_keyboard failed\n");
+        exit(3);
+    }
+}
+
+void shutdown_allegro(ALLEGRO_DISPLAY *display)
+{
+    al_uninstall_mouse();
+    al_destroy_display(display);
+    al_uninstall_keyboard();
+    al_shutdown_primitives_addon();
+}
+
+ALLEGRO_EVENT_QUEUE *create_event_queue(ALLEGRO_DISPLAY *display)
+{
+    ALLEGRO_EVENT_QUEUE *event_queue=al_create_event_queue();
+    if (!event_queue)
+    {
+        fprintf(stderr,"al_create_event_queue failed\n");
+        shutdown_allegro(display);
+        exit(4);
+    }
+    al_register_event_source(event_queue,al_get_keyboard_event_source());
+    al_register_event_source(event_queue,al_get_display_event_source(display));
+    return event_queue;
+}
+
+
+
+
+
+
+
+void clear_string(char *string)
+{
+    
+    char i;
+    for(i=0;string[i]!=0;i++)
+        string[i]=0;
+}
+
+void purl(char *text)
+{
+    char i;
+    while((*(text+i))!=0)
+    {
+        if((*(text+i))!='%')
+        fprintf(stderr,"%u",*(text+i));
+        else
+            fprintf(stderr,"%");
+        i++;
+    }
+}
+void get_continents(int search_ready,CTweet *search_array,int *continents)
+{
+   int k;
+   int continents2[6];
+   for(k=0;k<6;k++)
+   {
+       continents2[k]=continents[k];
+   }
+  
+   if(search_ready)
+   {
+         for(k=0;k<6;k++)
+   {
+       continents[k]=0;
+   }
+       next_search:
+       for(k=0;k<search_ready;k++)
+       {
+           if((search_array[k].loc.longitude>20)&&(search_array[k].loc.latitude<90))
+               continents[0]++;               
+           if((search_array[k].loc.longitude<20)&&(search_array[k].loc.longitude>-40)&&(search_array[k].loc.latitude>30)&&(search_array[k].loc.latitude<90))
+               continents[1]++;
+           if((search_array[k].loc.longitude<20)&&(search_array[k].loc.longitude>-40)&&(search_array[k].loc.latitude<30)&&(search_array[k].loc.latitude<90))
+           continents[2]++;
+           if((search_array[k].loc.longitude<-40)&&(search_array[k].loc.latitude<30)&&(search_array[k].loc.latitude<90))
+               continents[3]++;
+           if((search_array[k].loc.longitude<-40)&&(search_array[k].loc.latitude<20)&&(search_array[k].loc.latitude<90))
+               continents[4]++;  
+           if((search_array[k].loc.latitude<-60)&&(search_array[k].loc.latitude<90))
+               continents[5]++;  
+       }
+   }
+   /*for(k=0;k<6;k++)
+   {
+       if((continents[k]>continents2[k])&&(continents2[k]>0))
+           continents[k]=continents2[k];
+   }*/
+}

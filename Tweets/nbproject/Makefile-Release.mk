@@ -66,7 +66,7 @@ ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/tweets: /usr/lib/libtwitcurl.so.1
 
 ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/tweets: ${OBJECTFILES}
 	${MKDIR} -p ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}
-	${LINK.cc} -o ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/tweets ${OBJECTFILES} ${LDLIBSOPTIONS} -lallegro -lallegro_primitives -lallegro_ttf -lallegro_font
+	${LINK.cc} -o ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/tweets ${OBJECTFILES} ${LDLIBSOPTIONS} -lallegro -lallegro_primitives -lallegro_ttf -lallegro_font -lallegro_image
 
 ${OBJECTDIR}/_ext/1976688956/main.o: nbproject/Makefile-${CND_CONF}.mk /home/leandro/NetBeansProjects/Tweets/main.cpp 
 	${MKDIR} -p ${OBJECTDIR}/_ext/1976688956

@@ -5,15 +5,15 @@
 
 ////////////////////VARIABLES COMPARTIDAS ENTRE THREADS////////////////////
 BOOL Exit=false;
-char s1_text[TWEET_SIZE+1];
-char s2_text[TWEET_SIZE+1];
-char s3_text[TWEET_SIZE+1];
+char s1_text[TWEET_SIZE+1]={0};
+char s2_text[TWEET_SIZE+1]={0};
+char s3_text[TWEET_SIZE+1]={0};
 Uint s1_ready=false;
 Uint s2_ready=false;
 Uint s3_ready=false;
-CT s1_array[BUFFER_SIZE];
-CT s2_array[BUFFER_SIZE];
-CT s3_array[BUFFER_SIZE];
+CT s1_array[1];
+CT s2_array[1];
+CT s3_array[1];
 
 ////////////////////FUNCIONES DE INTERFAZ////////////////////
 BOOL get_exit_state(void)
@@ -48,6 +48,7 @@ BOOL new_search_text(char search_num,char*new_text)
     if(search==NULL) return ERROR;
     for(i=0;new_text[i];i++)
         search[i]=new_text[i];
+    search[i]=0;
     return 0;
 }
 
