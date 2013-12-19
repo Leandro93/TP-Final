@@ -1,5 +1,3 @@
-#define DEBUG
-
 #include <stdio.h>
 #include <pthread.h>
 #include "threads_intercommunication.h"
@@ -25,10 +23,12 @@ typedef Location dot;
 #define UBUNTU_TERMINAL 48,10,36
 #define COLOR(x) al_map_rgb(x)
 #define RGB(r,g,b) al_map_rgb(r,g,b)
+#define BACKGROUND COLOR(WHITE)
 #define SHOW() al_flip_display()
 
 #define FOREVER true
-#define SLEEP 1000000/60.0
+#define FPS 60.0
+#define SLEEP 1000000/FPS
 #define CONTINENTS 7
 #define XBOX 10
 #define YBOX -25
@@ -38,7 +38,7 @@ typedef Location dot;
 #define RADIUS 20.0
 #define MIN_RADIUS 2.0
 #define FADE 1
-#define DOTS (int)(3*FADE*SLEEP/3000)
+#define LIFE_SPAN (int)(FADE*FPS)
 #define CNI 31 //caracter no imprimible
 
 ////////////////////PROTOTIPOS////////////////////
@@ -139,11 +139,11 @@ void main_loop(ALLEGRO_DISPLAY*display,ALLEGRO_BITMAP*world,ALLEGRO_FONT*font,AL
     char search1_text[140*3+1];
     char search2_text[140*3+1];
     char search3_text[140*3+1];
-    dot puntos1[DOTS];
-    dot puntos2[DOTS];
-    dot puntos3[DOTS];
+    dot puntos1[LIFE_SPAN];
+    dot puntos2[LIFE_SPAN];
+    dot puntos3[LIFE_SPAN];
     char search_ready=NO_SEARCH;
-    for(i=0;i<DOTS;i++)
+    for(i=0;i<LIFE_SPAN;i++)
     {
         puntos1[i].latitude=10000;
         puntos1[i].longitude=10000;
@@ -160,6 +160,30 @@ void main_loop(ALLEGRO_DISPLAY*display,ALLEGRO_BITMAP*world,ALLEGRO_FONT*font,AL
             switch(event.type)
             {
                 case ALLEGRO_EVENT_MOUSE_BUTTON_DOWN:
+                    switch(search_ready)
+                    {
+                        case 1:
+                            new_search_text(1,search1_text);
+                            write_search_ready(1,false);
+                            for(k=0;k<CONTINENTS;k++)continentes1[k]=0;
+                            total1=0;
+                            set_minID(1,"0");
+                            break;
+                        case 2:
+                            new_search_text(2,search2_text);
+                            write_search_ready(2,false);
+                            for(k=0;k<CONTINENTS;k++)continentes2[k]=0;
+                            total2=0;
+                            set_minID(2,"0");
+                            break;
+                        case 3:
+                            new_search_text(3,search3_text);
+                            write_search_ready(3,false);
+                            for(k=0;k<CONTINENTS;k++)continentes3[k]=0;
+                            total3=0;
+                            set_minID(3,"0");
+                            break;
+                    }
                     if((event.mouse.x>20)&&(event.mouse.x<880))
                     {
                         if(event.mouse.y<25)
@@ -168,30 +192,6 @@ void main_loop(ALLEGRO_DISPLAY*display,ALLEGRO_BITMAP*world,ALLEGRO_FONT*font,AL
                             search1_text[0]=0;
                             i=0;
                             URLi=0;
-                            switch(search_ready)
-                            {
-                                case 1:
-                                    new_search_text(1,search1_text);
-                                    write_search_ready(1,false);
-                                    for(k=0;k<CONTINENTS;k++)continentes1[k]=0;
-                                    total1=0;
-                                    set_minID(1,"0");
-                                    break;
-                                case 2:
-                                    new_search_text(2,search2_text);
-                                    write_search_ready(2,false);
-                                    for(k=0;k<CONTINENTS;k++)continentes2[k]=0;
-                                    total2=0;
-                                    set_minID(2,"0");
-                                    break;
-                                case 3:
-                                    new_search_text(3,search3_text);
-                                    write_search_ready(3,false);
-                                    for(k=0;k<CONTINENTS;k++)continentes3[k]=0;
-                                    total3=0;
-                                    set_minID(3,"0");
-                                    break;
-                            }
                             search_ready=1;
                         }
                         else if(event.mouse.y<50)
@@ -200,30 +200,6 @@ void main_loop(ALLEGRO_DISPLAY*display,ALLEGRO_BITMAP*world,ALLEGRO_FONT*font,AL
                             search2_text[0]=0;
                             i=0;
                             URLi=0;
-                            switch(search_ready)
-                            {
-                                case 1:
-                                    new_search_text(1,search1_text);
-                                    write_search_ready(1,false);
-                                    for(k=0;k<CONTINENTS;k++)continentes1[k]=0;
-                                    total1=0;
-                                    set_minID(1,"0");
-                                    break;
-                                case 2:
-                                    new_search_text(2,search2_text);
-                                    write_search_ready(2,false);
-                                    for(k=0;k<CONTINENTS;k++)continentes2[k]=0;
-                                    total2=0;
-                                    set_minID(2,"0");
-                                    break;
-                                case 3:
-                                    new_search_text(3,search3_text);
-                                    write_search_ready(3,false);
-                                    for(k=0;k<CONTINENTS;k++)continentes3[k]=0;
-                                    total3=0;
-                                    set_minID(3,"0");
-                                    break;
-                            }
                             search_ready=2;
                         }
                         else if(event.mouse.y<75)
@@ -232,61 +208,11 @@ void main_loop(ALLEGRO_DISPLAY*display,ALLEGRO_BITMAP*world,ALLEGRO_FONT*font,AL
                             search3_text[0]=0;
                             i=0;
                             URLi=0;
-                            switch(search_ready)
-                            {
-                                case 1:
-                                    new_search_text(1,search1_text);
-                                    write_search_ready(1,false);
-                                    for(k=0;k<CONTINENTS;k++)continentes1[k]=0;
-                                    total1=0;
-                                    set_minID(1,"0");
-                                    break;
-                                case 2:
-                                    new_search_text(2,search2_text);
-                                    write_search_ready(2,false);
-                                    for(k=0;k<CONTINENTS;k++)continentes2[k]=0;
-                                    total2=0;
-                                    set_minID(2,"0");
-                                    break;
-                                case 3:
-                                    new_search_text(3,search3_text);
-                                    write_search_ready(3,false);
-                                    for(k=0;k<CONTINENTS;k++)continentes3[k]=0;
-                                    total3=0;
-                                    set_minID(3,"0");
-                                    break;
-                            }
                             search_ready=3;
                         }
-                        else
-                        {
-                            switch(search_ready)
-                            {
-                                case 1:
-                                    new_search_text(1,search1_text);
-                                    write_search_ready(1,false);
-                                    for(k=0;k<CONTINENTS;k++)continentes1[k]=0;
-                                    total1=0;
-                                    set_minID(1,"0");
-                                    break;
-                                case 2:
-                                    new_search_text(2,search2_text);
-                                    write_search_ready(2,false);
-                                    for(k=0;k<CONTINENTS;k++)continentes2[k]=0;
-                                    total2=0;
-                                    set_minID(2,"0");
-                                    break;
-                                case 3:
-                                    new_search_text(3,search3_text);
-                                    write_search_ready(3,false);
-                                    for(k=0;k<CONTINENTS;k++)continentes3[k]=0;
-                                    total3=0;
-                                    set_minID(3,"0");
-                                    break;
-                            }
-                            search_ready=NO_SEARCH;
-                        }
+                        else search_ready=NO_SEARCH;
                     }
+                    else search_ready=NO_SEARCH;
                     if((event.mouse.x>27)&&(event.mouse.x<150)&&(event.mouse.y>370)&&(event.mouse.y<410))
                         live=!live;
                     break;
@@ -413,32 +339,6 @@ void main_loop(ALLEGRO_DISPLAY*display,ALLEGRO_BITMAP*world,ALLEGRO_FONT*font,AL
             }
         }
         draw(world,font,text1,text2,text3,continentes1,continentes2,continentes3,&total1,&total2,&total3,puntos1,puntos2,puntos3,live);
-        #ifdef DEBUG
-        for(k=0;k<get_search_ready(1);k++)
-        {
-            printf("userName: %s\n" , get_search_array(1)[k].userName);
-            printf("text: %s\n"     , get_search_array(1)[k].text);
-            printf("lat:  %f\n"     , get_search_array(1)[k].loc.latitude );
-            printf("long: %f\n\n"   , get_search_array(1)[k].loc.longitude);
-            fflush(stdout);
-        }
-        for(k=0;k<get_search_ready(2);k++)
-        {
-            printf("userName: %s\n" , get_search_array(2)[k].userName);
-            printf("text: %s\n"     , get_search_array(2)[k].text);
-            printf("lat:  %f\n"     , get_search_array(2)[k].loc.latitude );
-            printf("long: %f\n\n"   , get_search_array(2)[k].loc.longitude);
-            fflush(stdout);
-        }
-        for(k=0;k<get_search_ready(3);k++)
-        {
-            printf("userName: %s\n" , get_search_array(3)[k].userName);
-            printf("text: %s\n"     , get_search_array(3)[k].text);
-            printf("lat:  %f\n"     , get_search_array(3)[k].loc.latitude );
-            printf("long: %f\n\n"   , get_search_array(3)[k].loc.longitude);
-            fflush(stdout);
-        }
-        #endif
         write_search_ready(1,false);
         write_search_ready(2,false);
         write_search_ready(3,false);
@@ -473,7 +373,7 @@ void get_continents(int search_ready,CTweet*search_array,Uint*continents,Uint*to
 void draw(ALLEGRO_BITMAP*world,ALLEGRO_FONT*font,char*text1,char*text2,char*text3,Uint*continentes1,Uint*continentes2,Uint*continentes3,Uint*total1,Uint*total2,Uint*total3,dot*puntos1,dot*puntos2,dot*puntos3,BOOL live)
 {
     static Uint j=0,k=0;
-    al_clear_to_color(COLOR(WHITE));
+    al_clear_to_color(BACKGROUND);
     al_draw_bitmap(world,0,50,0);
     al_draw_filled_rounded_rectangle(XBOX,YBOX+50,XBOX+880,YBOX+100,25,25,COLOR(GREEN));
     al_draw_filled_rounded_rectangle(XBOX,YBOX+25,XBOX+880,YBOX+75,25,25,COLOR(BLUE));
@@ -514,8 +414,7 @@ void draw(ALLEGRO_BITMAP*world,ALLEGRO_FONT*font,char*text1,char*text2,char*text
         puntos3[j].latitude=10000;
         puntos3[j].longitude=10000;
     }
-    if((j+1)<DOTS)j++;
-    else j=0;
+    if((j+1)<LIFE_SPAN)j++;else j=0;
     //AMERICA DEL NORTE
     if(total1&&continentes1[0])
         if(((RADIUS*continentes1[0])/(*total1))>MIN_RADIUS)
@@ -699,20 +598,19 @@ void draw(ALLEGRO_BITMAP*world,ALLEGRO_FONT*font,char*text1,char*text2,char*text
     al_draw_textf(font,COLOR(WHITE),30,270,ALLEGRO_ALIGN_LEFT,"%u",*total1);
     al_draw_textf(font,COLOR(WHITE),30,295,ALLEGRO_ALIGN_LEFT,"%u",*total2);
     al_draw_textf(font,COLOR(WHITE),30,320,ALLEGRO_ALIGN_LEFT,"%u",*total3);
-    //LIVE DOTS
-    al_draw_filled_rounded_rectangle(25,370,150,410,5,5,COLOR(BLACK));
-    al_draw_text(font,COLOR(WHITE),32,380,ALLEGRO_ALIGN_LEFT,"GO LIVE!");
-    if(!live)al_draw_filled_circle(130,390,7,COLOR(WHITE));
+    //LIVE LIFE_SPAN
+    if(!live)al_draw_filled_rounded_rectangle(25,370,150,410,5,5,COLOR(RED));
     else
     {
-        al_draw_filled_circle(130,390,7,COLOR(RED));
-        for(k=0;k<DOTS;k++)
+        al_draw_filled_rounded_rectangle(25,370,150,410,5,5,COLOR(GREEN));
+        for(k=0;k<LIFE_SPAN;k++)
             if(puntos1[k].longitude<9000)al_draw_filled_circle((((puntos1[k].longitude)/180)*(WIDTH/2))+(WIDTH/2),-(((puntos1[k].latitude)/90)*((HEIGHT-50)/2))+50+((HEIGHT-50)/2),2,COLOR(RED));
-        for(k=0;k<DOTS;k++)
+        for(k=0;k<LIFE_SPAN;k++)
             if(puntos2[k].longitude<9000)al_draw_filled_circle((((puntos2[k].longitude)/180)*(WIDTH/2))+(WIDTH/2),-(((puntos2[k].latitude)/90)*((HEIGHT-50)/2))+50+((HEIGHT-50)/2),2,COLOR(BLUE));
-        for(k=0;k<DOTS;k++)
+        for(k=0;k<LIFE_SPAN;k++)
             if(puntos3[k].longitude<9000)al_draw_filled_circle((((puntos3[k].longitude)/180)*(WIDTH/2))+(WIDTH/2),-(((puntos3[k].latitude)/90)*((HEIGHT-50)/2))+50+((HEIGHT-50)/2),2,COLOR(GREEN));
     }
+    al_draw_text(font,COLOR(WHITE),45,380,ALLEGRO_ALIGN_LEFT,"GO LIVE!");
     SHOW();
 }
 
@@ -765,7 +663,7 @@ void init_allegro(ALLEGRO_DISPLAY**display,ALLEGRO_BITMAP**world,ALLEGRO_FONT**f
     }
     al_set_window_position(*display,0,0);
     al_set_window_title(*display,"Tweets map.");
-    al_clear_to_color(COLOR(WHITE));
+    al_clear_to_color(BACKGROUND);
     al_init_font_addon();
     if(!al_init_ttf_addon())
     {
