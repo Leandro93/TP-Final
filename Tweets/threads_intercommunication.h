@@ -21,5 +21,8 @@ BOOL write_search_ready(char search_num,BOOL new_state);
 pCT get_search_array(char search_num);
 //Devuelve 1 si no exite search asociado a search_num, sino devuelve 0.
 BOOL write_search_array(char search_num,pCT new_array,Uint items_num);
-
+//Devuelve 1 si no exite search asociado a search_num, sino devuelve 0.
+char set_minID(char search_num,char*ID);
+//Devuelve NULL si no existe search asociado a search_num.
+char* get_minID(char search_num);
 #endif

@@ -46,4 +46,7 @@ CTweet *CT_search          (char *searchQuery, unsigned int *count, char *err);
 void    CT_searchReset     (void);
 
 void    CT_freeTweets      (CTweet *buffer);
+
+void set_minId(char*Id);
+char *get_minId(void);
 #endif

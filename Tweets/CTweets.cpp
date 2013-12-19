@@ -161,6 +161,17 @@ void CT_searchReset(void){
     minId = "0";
 }
 
+void set_minId(char*Id)
+{
+    minId=Id;
+}
+
+char *get_minId(void)
+{
+    char*min;
+    return(string2c(minId,min));
+}
+
 void CT_freeTweets(CTweet *buffer){
     delete[] buffer;
 }

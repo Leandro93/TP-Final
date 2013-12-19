@@ -14,6 +14,7 @@ Uint s3_ready=false;
 CT s1_array[1];
 CT s2_array[1];
 CT s3_array[1];
+char*minId1="0",*minId2="0",*minId3="0";
 
 ////////////////////FUNCIONES DE INTERFAZ////////////////////
 BOOL get_exit_state(void)
@@ -109,4 +110,35 @@ BOOL write_search_array(char search_num,pCT new_array,Uint items_num)
     for(i=0;i<items_num;i++)
         array[i]=new_array[i];
     return 0;
+}
+
+char set_minID(char search_num,char*ID)
+{
+    switch(search_num)
+    {
+        case 1:
+            minId1=ID;
+            return 0;
+        case 2:
+            minId2=ID;
+            return 0;
+        case 3:
+            minId3=ID;
+            return 0;
+    }
+    return 1;
+}
+
+char* get_minID(char search_num)
+{
+    switch(search_num)
+    {
+        case 1:
+            return minId1;
+        case 2:
+            return minId2;
+        case 3:
+            return minId3;
+    }
+    return NULL;
 }
