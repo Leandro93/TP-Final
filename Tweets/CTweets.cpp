@@ -175,13 +175,3 @@ char *string2c(string str, char *cstr){
 	}
 	return cstr;
 }
-
-
-    /* Twitter trends APIs (JSON) 
-bool trendsGet();
-    bool trendsDailyGet();
-    bool trendsWeeklyGet();
-    bool trendsCurrentGet();
-    bool trendsAvailableGet();
-
-*/

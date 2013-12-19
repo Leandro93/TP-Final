@@ -164,7 +164,6 @@
             <linkerLibFileItem>/usr/lib/libjson_linux-gcc-4.6_libmt.so</linkerLibFileItem>
             <linkerLibFileItem>/usr/lib/libtwitcurl.so.1</linkerLibFileItem>
             <linkerLibStdlibItem>PosixThreads</linkerLibStdlibItem>
-            <linkerLibStdlibItem>Mathematics</linkerLibStdlibItem>
           </linkerLibItems>
           <commandLine>-lallegro -lallegro_primitives -lallegro_ttf -lallegro_font -lallegro_image</commandLine>
         </linkerTool>

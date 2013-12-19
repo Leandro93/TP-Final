@@ -1,6 +1,6 @@
+#define DEBUG
+
 #include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
 #include <pthread.h>
 #include "threads_intercommunication.h"
 #include <allegro5/allegro5.h>
@@ -25,17 +25,19 @@ typedef Location dot;
 #define UBUNTU_TERMINAL 48,10,36
 #define COLOR(x) al_map_rgb(x)
 #define RGB(r,g,b) al_map_rgb(r,g,b)
+#define SHOW() al_flip_display()
 
 #define FOREVER true
 #define SLEEP 0.2
-#define CONTINENTS 6
+#define CONTINENTS 7
 #define XBOX 10
 #define YBOX -25
 #define NO_SEARCH 0
 #define URLDIF 12
 #define BACKSPACE 8
-#define RADIO 4
-#define FADE 1
+#define RADIUS 20.0
+#define MIN_RADIUS 2.0
+#define FADE 3
 #define CNI 31 //caracter no imprimible
 
 ////////////////////PROTOTIPOS////////////////////
@@ -45,7 +47,8 @@ void main_loop(ALLEGRO_DISPLAY*display,ALLEGRO_BITMAP*world,ALLEGRO_FONT*font,AL
 void init_CTweets(void);
 void init_allegro(ALLEGRO_DISPLAY**display,ALLEGRO_BITMAP**world,ALLEGRO_FONT**font,ALLEGRO_EVENT_QUEUE**event_queue);
 void shutdown_allegro(ALLEGRO_DISPLAY*display,ALLEGRO_BITMAP*world,ALLEGRO_FONT*font);
-void get_continents(int search_ready,CTweet*search_array,Uint*continents);
+void get_continents(int search_ready,CTweet*search_array,Uint*continents,Uint*total);
+void draw(ALLEGRO_BITMAP*world,ALLEGRO_FONT*font,char*text1,char*text2,char*text3,Uint*continentes1,Uint*continentes2,Uint*continentes3,Uint*total1,Uint*total2,Uint*total3,dot*puntos1,dot*puntos2,dot*puntos3,BOOL live);
 
 ////////////////////MAIN////////////////////
 int main(void)
@@ -116,15 +119,15 @@ void *search(void*)
 
 void main_loop(ALLEGRO_DISPLAY*display,ALLEGRO_BITMAP*world,ALLEGRO_FONT*font,ALLEGRO_EVENT_QUEUE*event_queue)
 {
-    char live=false;
-    Uint i,j,k,URLi;
-    Uint continentes1[6]={0,0,0,0,0,0};
-    Uint continentes2[6]={0,0,0,0,0,0};
-    Uint continentes3[6]={0,0,0,0,0,0};
+    BOOL live=false;
+    Uint i,k,URLi,total1=0,total2=0,total3=0;
+    Uint continentes1[CONTINENTS]={0,0,0,0,0,0,0};
+    Uint continentes2[CONTINENTS]={0,0,0,0,0,0,0};
+    Uint continentes3[CONTINENTS]={0,0,0,0,0,0,0};
     ALLEGRO_EVENT event;
-    char text1[141]={"Click here to start typing, then press enter to start searching."};
-    char text2[141]={0};
-    char text3[141]={0};
+    char text1[141]={"Click any of these bars to start typing, then press enter to start searching."};
+    char text2[141]={"Press the \"GO LIVE!\" button to briefly show dots where tweets come from."};
+    char text3[141]={"Circles next to the continents indicate the percentage of it in the world."};
     char search1_text[140*3+1];
     char search2_text[140*3+1];
     char search3_text[140*3+1];
@@ -153,27 +156,90 @@ void main_loop(ALLEGRO_DISPLAY*display,ALLEGRO_BITMAP*world,ALLEGRO_FONT*font,AL
                     {
                         if(event.mouse.y<25)
                         {
-                            search_ready=1;
                             text1[0]=0;
                             search1_text[0]=0;
                             i=0;
                             URLi=0;
+                            switch(search_ready)
+                            {
+                                case 1:
+                                    new_search_text(1,search1_text);
+                                    write_search_ready(1,false);
+                                    for(k=0;k<CONTINENTS;k++)continentes1[k]=0;
+                                    total1=0;
+                                    break;
+                                case 2:
+                                    new_search_text(2,search2_text);
+                                    write_search_ready(2,false);
+                                    for(k=0;k<CONTINENTS;k++)continentes2[k]=0;
+                                    total2=0;
+                                    break;
+                                case 3:
+                                    new_search_text(3,search3_text);
+                                    write_search_ready(3,false);
+                                    for(k=0;k<CONTINENTS;k++)continentes3[k]=0;
+                                    total3=0;
+                                    break;
+                            }
+                            search_ready=1;
                         }
                         else if(event.mouse.y<50)
                         {
-                            search_ready=2;
                             text2[0]=0;
                             search2_text[0]=0;
                             i=0;
                             URLi=0;
+                            switch(search_ready)
+                            {
+                                case 1:
+                                    new_search_text(1,search1_text);
+                                    write_search_ready(1,false);
+                                    for(k=0;k<CONTINENTS;k++)continentes1[k]=0;
+                                    total1=0;
+                                    break;
+                                case 2:
+                                    new_search_text(2,search2_text);
+                                    write_search_ready(2,false);
+                                    for(k=0;k<CONTINENTS;k++)continentes2[k]=0;
+                                    total2=0;
+                                    break;
+                                case 3:
+                                    new_search_text(3,search3_text);
+                                    write_search_ready(3,false);
+                                    for(k=0;k<CONTINENTS;k++)continentes3[k]=0;
+                                    total3=0;
+                                    break;
+                            }
+                            search_ready=2;
                         }
                         else if(event.mouse.y<75)
                         {
-                            search_ready=3;
                             text3[0]=0;
                             search3_text[0]=0;
                             i=0;
                             URLi=0;
+                            switch(search_ready)
+                            {
+                                case 1:
+                                    new_search_text(1,search1_text);
+                                    write_search_ready(1,false);
+                                    for(k=0;k<CONTINENTS;k++)continentes1[k]=0;
+                                    total1=0;
+                                    break;
+                                case 2:
+                                    new_search_text(2,search2_text);
+                                    write_search_ready(2,false);
+                                    for(k=0;k<CONTINENTS;k++)continentes2[k]=0;
+                                    total2=0;
+                                    break;
+                                case 3:
+                                    new_search_text(3,search3_text);
+                                    write_search_ready(3,false);
+                                    for(k=0;k<CONTINENTS;k++)continentes3[k]=0;
+                                    total3=0;
+                                    break;
+                            }
+                            search_ready=3;
                         }
                         else
                         {
@@ -182,17 +248,20 @@ void main_loop(ALLEGRO_DISPLAY*display,ALLEGRO_BITMAP*world,ALLEGRO_FONT*font,AL
                                 case 1:
                                     new_search_text(1,search1_text);
                                     write_search_ready(1,false);
-                                    for(k=0;k<6;k++)continentes1[k]=0;
+                                    for(k=0;k<CONTINENTS;k++)continentes1[k]=0;
+                                    total1=0;
                                     break;
                                 case 2:
                                     new_search_text(2,search2_text);
                                     write_search_ready(2,false);
-                                    for(k=0;k<6;k++)continentes2[k]=0;
+                                    for(k=0;k<CONTINENTS;k++)continentes2[k]=0;
+                                    total2=0;
                                     break;
                                 case 3:
                                     new_search_text(3,search3_text);
                                     write_search_ready(3,false);
-                                    for(k=0;k<6;k++)continentes3[k]=0;
+                                    for(k=0;k<CONTINENTS;k++)continentes3[k]=0;
+                                    total3=0;
                                     break;
                             }
                             search_ready=NO_SEARCH;
@@ -261,17 +330,20 @@ void main_loop(ALLEGRO_DISPLAY*display,ALLEGRO_BITMAP*world,ALLEGRO_FONT*font,AL
                                 case 1:
                                     new_search_text(1,search1_text);
                                     write_search_ready(1,false);
-                                    for(k=0;k<6;k++)continentes1[k]=0;
+                                    for(k=0;k<CONTINENTS;k++)continentes1[k]=0;
+                                    total1=0;
                                     break;
                                 case 2:
                                     new_search_text(2,search2_text);
                                     write_search_ready(2,false);
-                                    for(k=0;k<6;k++)continentes2[k]=0;
+                                    for(k=0;k<CONTINENTS;k++)continentes2[k]=0;
+                                    total2=0;
                                     break;
                                 case 3:
                                     new_search_text(3,search3_text);
                                     write_search_ready(3,false);
-                                    for(k=0;k<6;k++)continentes3[k]=0;
+                                    for(k=0;k<CONTINENTS;k++)continentes3[k]=0;
+                                    total3=0;
                                     break;
                             }
                             search_ready=NO_SEARCH;
@@ -283,7 +355,7 @@ void main_loop(ALLEGRO_DISPLAY*display,ALLEGRO_BITMAP*world,ALLEGRO_FONT*font,AL
                                     case 1:
                                         text1[--i]=0;
                                         search1_text[--URLi]=0;
-                                        if(search1_text[URLi-1]=='%')
+                                        if((URLi>2)&&(search1_text[URLi-2]=='%'))
                                         {
                                             search1_text[--URLi]=0;
                                             search1_text[--URLi]=0;
@@ -292,7 +364,7 @@ void main_loop(ALLEGRO_DISPLAY*display,ALLEGRO_BITMAP*world,ALLEGRO_FONT*font,AL
                                     case 2:
                                         text2[--i]=0;
                                         search2_text[--URLi]=0;
-                                        if(search2_text[URLi-1]=='%')
+                                        if((URLi>2)&&(search2_text[URLi-2]=='%'))
                                         {
                                             search2_text[--URLi]=0;
                                             search2_text[--URLi]=0;
@@ -301,7 +373,7 @@ void main_loop(ALLEGRO_DISPLAY*display,ALLEGRO_BITMAP*world,ALLEGRO_FONT*font,AL
                                     case 3:
                                         text3[--i]=0;
                                         search3_text[--URLi]=0;
-                                        if(search3_text[URLi-1]=='%')
+                                        if((URLi>2)&&(search3_text[URLi-2]=='%'))
                                         {
                                             search3_text[--URLi]=0;
                                             search3_text[--URLi]=0;
@@ -317,120 +389,33 @@ void main_loop(ALLEGRO_DISPLAY*display,ALLEGRO_BITMAP*world,ALLEGRO_FONT*font,AL
                     return;
             }
         }
-        //DRAWING
-        al_clear_to_color(COLOR(WHITE));
-        al_draw_bitmap(world,0,50,0);
-        al_draw_filled_rounded_rectangle(XBOX,YBOX+50,XBOX+880,YBOX+100,25,25,COLOR(GREEN));
-        al_draw_filled_rounded_rectangle(XBOX,YBOX+25,XBOX+880,YBOX+75,25,25,COLOR(BLUE));
-        al_draw_filled_rounded_rectangle(XBOX,YBOX,XBOX+880,YBOX+50,25,25,COLOR(RED));
-        al_draw_text(font,al_map_rgb(255,255,255),XBOX+20,YBOX+25,ALLEGRO_ALIGN_LEFT,text1);
-        al_draw_text(font,al_map_rgb(255,255,255),XBOX+20,YBOX+75,ALLEGRO_ALIGN_LEFT,text3);
-        al_draw_text(font,al_map_rgb(255,255,255),XBOX+20,YBOX+50,ALLEGRO_ALIGN_LEFT,text2);
-        if(get_search_ready(1))
-        {
-            get_continents(get_search_ready(1),get_search_array(1),continentes1);
-            puntos1[j].latitude=get_search_array(1)[0].loc.latitude;
-            puntos1[j].longitude=get_search_array(1)[0].loc.longitude;
-        }
-        else
-        {
-            puntos1[j].latitude=10000;
-            puntos1[j].longitude=10000;
-        }
-        if(get_search_ready(2))
-        {
-            get_continents(get_search_ready(2),get_search_array(2),continentes2);
-            puntos2[j].latitude=get_search_array(2)[0].loc.latitude;
-            puntos2[j].longitude=get_search_array(2)[0].loc.longitude;
-        }
-        else
-        {
-            puntos2[j].latitude=10000;
-            puntos2[j].longitude=10000;
-        }
-        if(get_search_ready(3))
-        {
-            get_continents(get_search_ready(3),get_search_array(3),continentes3);
-            puntos3[j].latitude=get_search_array(3)[0].loc.latitude;
-            puntos3[j].longitude=get_search_array(3)[0].loc.longitude;
-        }
-        else
-        {
-            puntos3[j].latitude=10000;
-            puntos3[j].longitude=10000;
-        }
-        j++;
-        if(j==(int)(FADE/SLEEP))j=0;
-        //AMERICA
-        al_draw_filled_circle(150,170,RADIO*continentes1[0],COLOR(RED));
-        al_draw_filled_circle(200,170,RADIO*continentes2[0],COLOR(BLUE));
-        al_draw_filled_circle(250,170,RADIO*continentes3[0],COLOR(GREEN));
-        //EUROPA
-        al_draw_filled_circle(428,176,RADIO*continentes1[1],COLOR(RED));
-        al_draw_filled_circle(450,150,RADIO*continentes2[1],COLOR(BLUE));
-        al_draw_filled_circle(470,120,RADIO*continentes3[1],COLOR(GREEN));
-        //ANTARTIDA
-        al_draw_filled_circle(450,470,RADIO*continentes1[5],COLOR(RED));
-        al_draw_filled_circle(400,470,RADIO*continentes2[5],COLOR(BLUE));
-        al_draw_filled_circle(470,470,RADIO*continentes3[5],COLOR(GREEN));
-        //AFRICA
-        al_draw_filled_circle(490,370,RADIO*continentes1[2],COLOR(RED));
-        al_draw_filled_circle(500,250,RADIO*continentes2[2],COLOR(BLUE));
-        al_draw_filled_circle(500,300,RADIO*continentes3[2],COLOR(GREEN));
-        //ASIA
-        al_draw_filled_circle(728,176,RADIO*continentes1[3],COLOR(RED));
-        al_draw_filled_circle(750,150,RADIO*continentes2[3],COLOR(BLUE));
-        al_draw_filled_circle(670,180,RADIO*continentes3[3],COLOR(GREEN));
-        //OCEANIA
-        al_draw_filled_circle(728,376,RADIO*continentes1[4],COLOR(RED));
-        al_draw_filled_circle(750,350,RADIO*continentes2[4],COLOR(BLUE));
-        al_draw_filled_circle(770,380,RADIO*continentes3[4],COLOR(GREEN));
-        //LIVE DOTS
-        al_draw_filled_rounded_rectangle(25,370,150,410,5,5,COLOR(BLACK));
-        al_draw_text(font,COLOR(WHITE),32,380,ALLEGRO_ALIGN_LEFT,"GO LIVE!");
-        if(!live)al_draw_filled_circle(130,390,7,COLOR(WHITE));
-        else
-        {
-            al_draw_filled_circle(130,390,7,COLOR(RED));
-            for(k=0;k<(int)(FADE/SLEEP);k++)
-                if(puntos1[k].longitude<9000)al_draw_filled_circle((((puntos1[k].longitude)/180)*(WIDTH/2))+(WIDTH/2),-(((puntos1[k].latitude)/90)*((HEIGHT-50)/2))+50+((HEIGHT-50)/2),2,COLOR(RED));
-            for(k=0;k<(int)(FADE/SLEEP);k++)
-                if(puntos2[k].longitude<9000)al_draw_filled_circle((((puntos2[k].longitude)/180)*(WIDTH/2))+(WIDTH/2),-(((puntos2[k].latitude)/90)*((HEIGHT-50)/2))+50+((HEIGHT-50)/2),2,COLOR(BLUE));
-            for(k=0;k<(int)(FADE/SLEEP);k++)
-                if(puntos3[k].longitude<9000)al_draw_filled_circle((((puntos3[k].longitude)/180)*(WIDTH/2))+(WIDTH/2),-(((puntos3[k].latitude)/90)*((HEIGHT-50)/2))+50+((HEIGHT-50)/2),2,COLOR(GREEN));
-        }
-        al_flip_display();
-        //DEBUG
+        draw(world,font,text1,text2,text3,continentes1,continentes2,continentes3,&total1,&total2,&total3,puntos1,puntos2,puntos3,live);
+        #ifdef DEBUG
         for(k=0;k<get_search_ready(1);k++)
         {
-            printf("user: %s\n"     , get_search_array(1)[k].user);
             printf("userName: %s\n" , get_search_array(1)[k].userName);
             printf("text: %s\n"     , get_search_array(1)[k].text);
-            printf("lang: %s\n"     , get_search_array(1)[k].lang);
             printf("lat:  %f\n"     , get_search_array(1)[k].loc.latitude );
             printf("long: %f\n\n"   , get_search_array(1)[k].loc.longitude);
             fflush(stdout);
         }
         for(k=0;k<get_search_ready(2);k++)
         {
-            printf("user: %s\n"     , get_search_array(2)[k].user);
             printf("userName: %s\n" , get_search_array(2)[k].userName);
             printf("text: %s\n"     , get_search_array(2)[k].text);
-            printf("lang: %s\n"     , get_search_array(2)[k].lang);
             printf("lat:  %f\n"     , get_search_array(2)[k].loc.latitude );
             printf("long: %f\n\n"   , get_search_array(2)[k].loc.longitude);
             fflush(stdout);
         }
         for(k=0;k<get_search_ready(3);k++)
         {
-            printf("user: %s\n"     , get_search_array(3)[k].user);
             printf("userName: %s\n" , get_search_array(3)[k].userName);
             printf("text: %s\n"     , get_search_array(3)[k].text);
-            printf("lang: %s\n"     , get_search_array(3)[k].lang);
             printf("lat:  %f\n"     , get_search_array(3)[k].loc.latitude );
             printf("long: %f\n\n"   , get_search_array(3)[k].loc.longitude);
             fflush(stdout);
         }
+        #endif
         write_search_ready(1,false);
         write_search_ready(2,false);
         write_search_ready(3,false);
@@ -439,24 +424,273 @@ void main_loop(ALLEGRO_DISPLAY*display,ALLEGRO_BITMAP*world,ALLEGRO_FONT*font,AL
 }
 
 ////////////////////FUNCIONES////////////////////
-void get_continents(int search_ready,CTweet*search_array,Uint*continents)
+void get_continents(int search_ready,CTweet*search_array,Uint*continents,Uint*total)
 {
     Uint k;
     for(k=0;k<search_ready;k++)
     {
-        if((search_array[k].loc.longitude<-30)&&(search_array[k].loc.longitude>=-175)&&(search_array[k].loc.latitude<90)&&(search_array[k].loc.latitude>=-60))
+        if((search_array[k].loc.longitude<-25)&&(search_array[k].loc.longitude>=-175)&&(search_array[k].loc.latitude<90)&&(search_array[k].loc.latitude>=15))
             continents[0]++;
-        if((search_array[k].loc.longitude<36)&&(search_array[k].loc.longitude>=-30)&&(search_array[k].loc.latitude>=36)&&(search_array[k].loc.latitude<90))
+        else if((search_array[k].loc.longitude<36)&&(search_array[k].loc.longitude>=-30)&&(search_array[k].loc.latitude>=36)&&(search_array[k].loc.latitude<90))
             continents[1]++;
-        if((search_array[k].loc.longitude<36)&&(search_array[k].loc.longitude>=-30)&&(search_array[k].loc.latitude<36)&&(search_array[k].loc.latitude>-40))
+        else if((search_array[k].loc.longitude<36)&&(search_array[k].loc.longitude>=-30)&&(search_array[k].loc.latitude<36)&&(search_array[k].loc.latitude>-40))
             continents[2]++;
-        if((search_array[k].loc.longitude>=36)&&(search_array[k].loc.longitude<180)&&(search_array[k].loc.latitude<90)&&(search_array[k].loc.latitude>-10))
+        else if((search_array[k].loc.longitude>=36)&&(search_array[k].loc.longitude<180)&&(search_array[k].loc.latitude<90)&&(search_array[k].loc.latitude>-10))
             continents[3]++;
-        if((search_array[k].loc.longitude>90)&&(search_array[k].loc.latitude<=-10)&&(search_array[k].loc.latitude>=-60))
+        else if((search_array[k].loc.longitude>90)&&(search_array[k].loc.latitude<=-10)&&(search_array[k].loc.latitude>=-60))
             continents[4]++;
-        if((search_array[k].loc.latitude<-60))
+        else if((search_array[k].loc.latitude<-60))
             continents[5]++;
+        else if((search_array[k].loc.longitude<-25)&&(search_array[k].loc.longitude>=-100)&&(search_array[k].loc.latitude>=-60)&&(search_array[k].loc.latitude<15))
+            continents[6]++;
+        if(search_array[k].loc.latitude<=90)(*total)++;
     }
+}
+
+void draw(ALLEGRO_BITMAP*world,ALLEGRO_FONT*font,char*text1,char*text2,char*text3,Uint*continentes1,Uint*continentes2,Uint*continentes3,Uint*total1,Uint*total2,Uint*total3,dot*puntos1,dot*puntos2,dot*puntos3,BOOL live)
+{
+    Uint j,k;
+    al_clear_to_color(COLOR(WHITE));
+    al_draw_bitmap(world,0,50,0);
+    al_draw_filled_rounded_rectangle(XBOX,YBOX+50,XBOX+880,YBOX+100,25,25,COLOR(GREEN));
+    al_draw_filled_rounded_rectangle(XBOX,YBOX+25,XBOX+880,YBOX+75,25,25,COLOR(BLUE));
+    al_draw_filled_rounded_rectangle(XBOX,YBOX,XBOX+880,YBOX+50,25,25,COLOR(RED));
+    al_draw_text(font,COLOR(WHITE),XBOX+10,YBOX+25,ALLEGRO_ALIGN_LEFT,text1);
+    al_draw_text(font,COLOR(WHITE),XBOX+10,YBOX+75,ALLEGRO_ALIGN_LEFT,text3);
+    al_draw_text(font,COLOR(WHITE),XBOX+10,YBOX+50,ALLEGRO_ALIGN_LEFT,text2);
+    if(get_search_ready(1))
+    {
+        get_continents(get_search_ready(1),get_search_array(1),continentes1,total1);
+        puntos1[j].latitude=get_search_array(1)[0].loc.latitude;
+        puntos1[j].longitude=get_search_array(1)[0].loc.longitude;
+    }
+    else
+    {
+        puntos1[j].latitude=10000;
+        puntos1[j].longitude=10000;
+    }
+    if(get_search_ready(2))
+    {
+        get_continents(get_search_ready(2),get_search_array(2),continentes2,total2);
+        puntos2[j].latitude=get_search_array(2)[0].loc.latitude;
+        puntos2[j].longitude=get_search_array(2)[0].loc.longitude;
+    }
+    else
+    {
+        puntos2[j].latitude=10000;
+        puntos2[j].longitude=10000;
+    }
+    if(get_search_ready(3))
+    {
+        get_continents(get_search_ready(3),get_search_array(3),continentes3,total3);
+        puntos3[j].latitude=get_search_array(3)[0].loc.latitude;
+        puntos3[j].longitude=get_search_array(3)[0].loc.longitude;
+    }
+    else
+    {
+        puntos3[j].latitude=10000;
+        puntos3[j].longitude=10000;
+    }
+    j++;
+    if(j==(int)(FADE/SLEEP))j=0;
+    //AMERICA DEL NORTE
+    if(total1&&continentes1[0])
+        if(((RADIUS*continentes1[0])/(*total1))>MIN_RADIUS)
+            if(((RADIUS*continentes1[0])/(*total1))<RADIUS)
+                al_draw_filled_circle(90,170,(RADIUS*continentes1[0])/(*total1),COLOR(RED));
+            else
+                al_draw_filled_circle(90,170,RADIUS,COLOR(RED));
+        else
+            al_draw_filled_circle(90,170,MIN_RADIUS,COLOR(RED));
+    if(total2&&continentes2[0])
+        if(((RADIUS*continentes2[0])/(*total2))>MIN_RADIUS)
+            if(((RADIUS*continentes2[0])/(*total2))<RADIUS)
+                al_draw_filled_circle(118.28,198.28,(RADIUS*continentes2[0])/(*total2),COLOR(BLUE));
+            else
+                al_draw_filled_circle(118.28,198.28,RADIUS,COLOR(BLUE));
+        else
+            al_draw_filled_circle(118.28,198.28,MIN_RADIUS,COLOR(BLUE));
+    if(total3&&continentes3[0])
+        if(((RADIUS*continentes3[0])/(*total3))>MIN_RADIUS)
+            if(((RADIUS*continentes3[0])/(*total3))<RADIUS)
+                al_draw_filled_circle(146.57,226.57,(RADIUS*continentes3[0])/(*total3),COLOR(GREEN));
+            else
+                al_draw_filled_circle(146.57,226.57,RADIUS,COLOR(GREEN));
+        else
+            al_draw_filled_circle(146.57,226.57,MIN_RADIUS,COLOR(GREEN));
+    //AMERICA DEL SUR
+    if(total1&&continentes1[6])
+        if(((RADIUS*continentes1[6])/(*total1))>MIN_RADIUS)
+            if(((RADIUS*continentes1[6])/(*total1))<RADIUS)
+                al_draw_filled_circle(230,310,(RADIUS*continentes1[6])/(*total1),COLOR(RED));
+            else
+                al_draw_filled_circle(230,310,RADIUS,COLOR(RED));
+        else
+            al_draw_filled_circle(230,310,MIN_RADIUS,COLOR(RED));
+    if(total2&&continentes2[6])
+        if(((RADIUS*continentes2[6])/(*total2))>MIN_RADIUS)
+            if(((RADIUS*continentes2[6])/(*total2))<RADIUS)
+                al_draw_filled_circle(230,350,(RADIUS*continentes2[6])/(*total2),COLOR(BLUE));
+            else
+                al_draw_filled_circle(230,350,RADIUS,COLOR(BLUE));
+        else
+            al_draw_filled_circle(230,350,MIN_RADIUS,COLOR(BLUE));
+    if(total3&&continentes3[6])
+        if(((RADIUS*continentes3[6])/(*total3))>MIN_RADIUS)
+            if(((RADIUS*continentes3[6])/(*total3))<RADIUS)
+                al_draw_filled_circle(230,390,(RADIUS*continentes3[6])/(*total3),COLOR(GREEN));
+            else
+                al_draw_filled_circle(230,390,RADIUS,COLOR(GREEN));
+        else
+            al_draw_filled_circle(230,390,MIN_RADIUS,COLOR(GREEN));
+    //EUROPA
+    if(total1&&continentes1[1])
+        if(((RADIUS*continentes1[1])/(*total1))>MIN_RADIUS)
+            if(((RADIUS*continentes1[1])/(*total1))<RADIUS)
+                al_draw_filled_circle(400,140,(RADIUS*continentes1[1])/(*total1),COLOR(RED));
+            else
+                al_draw_filled_circle(400,140,RADIUS,COLOR(RED));
+        else
+            al_draw_filled_circle(400,140,MIN_RADIUS,COLOR(RED));
+    if(total2&&continentes2[1])
+        if(((RADIUS*continentes2[1])/(*total2))>MIN_RADIUS)
+            if(((RADIUS*continentes2[1])/(*total2))<RADIUS)
+                al_draw_filled_circle(400,180,(RADIUS*continentes2[1])/(*total2),COLOR(BLUE));
+            else
+                al_draw_filled_circle(400,180,RADIUS,COLOR(BLUE));
+        else
+            al_draw_filled_circle(400,180,MIN_RADIUS,COLOR(BLUE));
+    if(total3&&continentes3[1])
+        if(((RADIUS*continentes3[1])/(*total3))>MIN_RADIUS)
+            if(((RADIUS*continentes3[1])/(*total3))<RADIUS)
+                al_draw_filled_circle(365.36,160,(RADIUS*continentes3[1])/(*total3),COLOR(GREEN));
+            else
+                al_draw_filled_circle(365.36,160,RADIUS,COLOR(GREEN));
+        else
+            al_draw_filled_circle(365.36,160,MIN_RADIUS,COLOR(GREEN));
+    //ANTARTIDA
+    if(total1&&continentes1[5])
+        if(((RADIUS*continentes1[5])/(*total1))>MIN_RADIUS)
+            if(((RADIUS*continentes1[5])/(*total1))<RADIUS)
+                al_draw_filled_circle(410,420,(RADIUS*continentes1[5])/(*total1),COLOR(RED));
+            else
+                al_draw_filled_circle(410,420,RADIUS,COLOR(RED));
+        else
+            al_draw_filled_circle(410,420,MIN_RADIUS,COLOR(RED));
+    if(total2&&continentes2[5])
+        if(((RADIUS*continentes2[5])/(*total2))>MIN_RADIUS)
+            if(((RADIUS*continentes2[5])/(*total2))<RADIUS)
+                al_draw_filled_circle(450,420,(RADIUS*continentes2[5])/(*total2),COLOR(BLUE));
+            else
+                al_draw_filled_circle(450,420,RADIUS,COLOR(BLUE));
+        else
+            al_draw_filled_circle(450,420,MIN_RADIUS,COLOR(BLUE));
+    if(total3&&continentes3[5])
+        if(((RADIUS*continentes3[5])/(*total3))>MIN_RADIUS)
+            if(((RADIUS*continentes3[5])/(*total3))<RADIUS)
+                al_draw_filled_circle(490,420,(RADIUS*continentes3[5])/(*total3),COLOR(GREEN));
+            else
+                al_draw_filled_circle(490,420,RADIUS,COLOR(GREEN));
+        else
+            al_draw_filled_circle(490,420,MIN_RADIUS,COLOR(GREEN));
+    //AFRICA
+    if(total1&&continentes1[2])
+        if(((RADIUS*continentes1[2])/(*total1))>MIN_RADIUS)
+            if(((RADIUS*continentes1[2])/(*total1))<RADIUS)
+                al_draw_filled_circle(450,285,(RADIUS*continentes1[2])/(*total1),COLOR(RED));
+            else
+                al_draw_filled_circle(450,285,RADIUS,COLOR(RED));
+        else
+            al_draw_filled_circle(450,285,MIN_RADIUS,COLOR(RED));
+    if(total2&&continentes2[2])
+        if(((RADIUS*continentes2[2])/(*total2))>MIN_RADIUS)
+            if(((RADIUS*continentes2[2])/(*total2))<RADIUS)
+                al_draw_filled_circle(450,325,(RADIUS*continentes2[2])/(*total2),COLOR(BLUE));
+            else
+                al_draw_filled_circle(450,325,RADIUS,COLOR(BLUE));
+        else
+            al_draw_filled_circle(450,325,MIN_RADIUS,COLOR(BLUE));
+    if(total3&&continentes3[2])
+        if(((RADIUS*continentes3[2])/(*total3))>MIN_RADIUS)
+            if(((RADIUS*continentes3[2])/(*total3))<RADIUS)
+                al_draw_filled_circle(415.36,305,(RADIUS*continentes3[2])/(*total3),COLOR(GREEN));
+            else
+                al_draw_filled_circle(415.36,305,RADIUS,COLOR(GREEN));
+        else
+            al_draw_filled_circle(415.36,305,MIN_RADIUS,COLOR(GREEN));
+    //ASIA
+    if(total1&&continentes1[3])
+        if(((RADIUS*continentes1[3])/(*total1))>MIN_RADIUS)
+            if(((RADIUS*continentes1[3])/(*total1))<RADIUS)
+                al_draw_filled_circle(820,220,(RADIUS*continentes1[3])/(*total1),COLOR(RED));
+            else
+                al_draw_filled_circle(820,220,RADIUS,COLOR(RED));
+        else
+            al_draw_filled_circle(820,220,MIN_RADIUS,COLOR(RED));
+    if(total2&&continentes2[3])
+        if(((RADIUS*continentes2[3])/(*total2))>MIN_RADIUS)
+            if(((RADIUS*continentes2[3])/(*total2))<RADIUS)
+                al_draw_filled_circle(840,185.36,(RADIUS*continentes2[3])/(*total2),COLOR(BLUE));
+            else
+                al_draw_filled_circle(840,185.36,RADIUS,COLOR(BLUE));
+        else
+            al_draw_filled_circle(840,185.36,MIN_RADIUS,COLOR(BLUE));
+    if(total3&&continentes3[3])
+        if(((RADIUS*continentes3[3])/(*total3))>MIN_RADIUS)
+            if(((RADIUS*continentes3[3])/(*total3))<RADIUS)
+                al_draw_filled_circle(860,220,(RADIUS*continentes3[3])/(*total3),COLOR(GREEN));
+            else
+                al_draw_filled_circle(860,220,RADIUS,COLOR(GREEN));
+        else
+            al_draw_filled_circle(860,220,MIN_RADIUS,COLOR(GREEN));
+    //OCEANIA
+    if(total1&&continentes1[4])
+        if(((RADIUS*continentes1[4])/(*total1))>MIN_RADIUS)
+            if(((RADIUS*continentes1[4])/(*total1))<RADIUS)
+                al_draw_filled_circle(710,350,(RADIUS*continentes1[4])/(*total1),COLOR(RED));
+            else
+                al_draw_filled_circle(710,350,RADIUS,COLOR(RED));
+        else
+            al_draw_filled_circle(710,350,MIN_RADIUS,COLOR(RED));
+    if(total2&&continentes2[4])
+        if(((RADIUS*continentes2[4])/(*total2))>MIN_RADIUS)
+            if(((RADIUS*continentes2[4])/(*total2))<RADIUS)
+                al_draw_filled_circle(710,390,(RADIUS*continentes2[4])/(*total2),COLOR(BLUE));
+            else
+                al_draw_filled_circle(710,390,RADIUS,COLOR(BLUE));
+        else
+            al_draw_filled_circle(710,390,MIN_RADIUS,COLOR(BLUE));
+    if(total3&&continentes3[4])
+        if(((RADIUS*continentes3[4])/(*total3))>MIN_RADIUS)
+            if(((RADIUS*continentes3[4])/(*total3))<RADIUS)
+                al_draw_filled_circle(750,390,(RADIUS*continentes3[4])/(*total3),COLOR(GREEN));
+            else
+                al_draw_filled_circle(750,390,RADIUS,COLOR(GREEN));
+        else
+            al_draw_filled_circle(750,390,MIN_RADIUS,COLOR(GREEN));
+    //TOTAL TWEETS
+    al_draw_filled_rounded_rectangle(25,265,162,300,5,5,COLOR(RED));
+    al_draw_filled_rounded_rectangle(25,290,162,325,5,5,COLOR(BLUE));
+    al_draw_filled_rounded_rectangle(25,315,162,350,5,5,COLOR(GREEN));
+    al_draw_text(font,COLOR(BLACK),25,248,ALLEGRO_ALIGN_LEFT,"Total tweets");
+    al_draw_textf(font,COLOR(WHITE),30,270,ALLEGRO_ALIGN_LEFT,"%u",*total1);
+    al_draw_textf(font,COLOR(WHITE),30,295,ALLEGRO_ALIGN_LEFT,"%u",*total2);
+    al_draw_textf(font,COLOR(WHITE),30,320,ALLEGRO_ALIGN_LEFT,"%u",*total3);
+    //LIVE DOTS
+    al_draw_filled_rounded_rectangle(25,370,150,410,5,5,COLOR(BLACK));
+    al_draw_text(font,COLOR(WHITE),32,380,ALLEGRO_ALIGN_LEFT,"GO LIVE!");
+    if(!live)al_draw_filled_circle(130,390,7,COLOR(WHITE));
+    else
+    {
+        al_draw_filled_circle(130,390,7,COLOR(RED));
+        for(k=0;k<(int)(FADE/SLEEP);k++)
+            if(puntos1[k].longitude<9000)al_draw_filled_circle((((puntos1[k].longitude)/180)*(WIDTH/2))+(WIDTH/2),-(((puntos1[k].latitude)/90)*((HEIGHT-50)/2))+50+((HEIGHT-50)/2),1,COLOR(RED));
+        for(k=0;k<(int)(FADE/SLEEP);k++)
+            if(puntos2[k].longitude<9000)al_draw_filled_circle((((puntos2[k].longitude)/180)*(WIDTH/2))+(WIDTH/2),-(((puntos2[k].latitude)/90)*((HEIGHT-50)/2))+50+((HEIGHT-50)/2),1,COLOR(BLUE));
+        for(k=0;k<(int)(FADE/SLEEP);k++)
+            if(puntos3[k].longitude<9000)al_draw_filled_circle((((puntos3[k].longitude)/180)*(WIDTH/2))+(WIDTH/2),-(((puntos3[k].latitude)/90)*((HEIGHT-50)/2))+50+((HEIGHT-50)/2),1,COLOR(GREEN));
+    }
+    SHOW();
 }
 
 ////////////////////CTWEETS////////////////////
@@ -539,7 +773,7 @@ void init_allegro(ALLEGRO_DISPLAY**display,ALLEGRO_BITMAP**world,ALLEGRO_FONT**f
         exit(8);
     }
     al_draw_bitmap(*world,0,50,0);
-    al_flip_display();
+    SHOW();
     *font=al_load_ttf_font("stocky.ttf",20,0);
     if (!*font)
     {

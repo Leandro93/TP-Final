@@ -54,7 +54,7 @@ FFLAGS=
 ASFLAGS=
 
 # Link Libraries and Options
-LDLIBSOPTIONS=/usr/lib/libjson_linux-gcc-4.6_libmt.so /usr/lib/libtwitcurl.so.1 -lpthread -lm
+LDLIBSOPTIONS=/usr/lib/libjson_linux-gcc-4.6_libmt.so /usr/lib/libtwitcurl.so.1 -lpthread
 
 # Build Targets
 .build-conf: ${BUILD_SUBPROJECTS}

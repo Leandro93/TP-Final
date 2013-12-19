@@ -23,4 +23,3 @@ pCT get_search_array(char search_num);
 BOOL write_search_array(char search_num,pCT new_array,Uint items_num);
 
 #endif
-
